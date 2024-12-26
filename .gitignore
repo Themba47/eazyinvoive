@@ -1,0 +1,23 @@
+# Virtual Environment
+.venv/
+node_modules/
+.virtualenvs/
+migrations/
+media/
+dist/
+
+# Python
+__pycache__/
+*.pyo
+*.pyd
+*.cpython
+*.pyc
+*.sqlite3
+*.db
+*.DS_Store
+*.log
+
+.sh
+.env
+
+fonts/
