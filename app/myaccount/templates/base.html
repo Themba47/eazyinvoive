@@ -1,0 +1,49 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block head_title %}{% endblock %}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.2/css/all.css" rel="stylesheet">
+    <link rel="shortcut icon" type="image/jpg" href="{% static 'img/favicon.ico' %}">
+    <link rel="stylesheet" href="{% static 'css/static.css' %}">
+    {% block style %} {% endblock style %}
+    {% block extra_head %}
+    {% endblock %}
+  </head>
+  <body>
+    
+    <style>
+      .btn-open, #dienav {
+        display: none;
+      }
+    </style>
+    {% block body %}
+
+    {% if messages %}
+    <div class="messages container">
+        {% for message in messages %}
+        <div {% if message.tags %} class="alert alert-{{ message.tags }}{% endif %}" role="alert">
+          {{ message|safe }}
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+        </div>
+        {% endfor %}
+    </div>
+  {% endif %}
+
+    
+    {% block content %}
+    {% endblock %}
+    {% endblock %}
+    {% block extra_body %}
+    {% endblock %}
+    {% include 'luna/partials/script.html'%}
+
+
+  </body>
+</html>
