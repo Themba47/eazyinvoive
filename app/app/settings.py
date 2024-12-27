@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.staticfiles',
     #internal
+    'core',
     'myaccount',
     #external
     'crispy_forms',
@@ -262,6 +263,8 @@ QR_CODE = 'qr-code'
 COMPANY_LOGO = 'logos'
 RECORDS = 'records'
 UPLOAD_PICS = 'profile_pics'
+INVOICE = 'invoice'
+CREATED_INVOICE = 'created_invoice'
 DB_BACKUP = 'db_backup'
 
 # Default primary key field type
