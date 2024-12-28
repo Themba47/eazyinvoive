@@ -48,7 +48,7 @@ const RegisterScreen: React.FC = ({ navigation }: any) => {
 	try {
 	  const response = await axios.post(`${backendApp()}/api/auth/registration/`, {
 		 email,
-		 fist_name: firstname,
+		 first_name: firstname,
 		 last_name: lastname,
 		 Country: selectedCountry,
 		 password1: password,
@@ -61,7 +61,7 @@ const RegisterScreen: React.FC = ({ navigation }: any) => {
 		withCredentials: true, // Ensures cookies are sent with the request
 	}
 	);
-
+	  console.log("Registration succesful")
 	  const token = response.data.key;
      setAuthToken(token);
 	  // Show success toast
@@ -82,7 +82,6 @@ const RegisterScreen: React.FC = ({ navigation }: any) => {
 			 Alert.alert('Registration Error', errors.password[0]);
 		  } else {
 			 Alert.alert(`Registration Error', 'An unknown error occurred. ${errors.email[0]}`);
-			 console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n")
 			 console.log(error.response)
 		  }
 		} else {
@@ -93,7 +92,7 @@ const RegisterScreen: React.FC = ({ navigation }: any) => {
 
   return (
 	 <View style={styles.container}>
-		<Text style={styles.title}>Sign Up 5</Text>
+		<Text style={styles.title}>Sign Up</Text>
 		<TextInput
 		  style={styles.input}
 		  placeholder="Email"

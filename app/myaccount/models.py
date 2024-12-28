@@ -51,7 +51,7 @@ class CustomUser(AbstractUser):
 
 class CustomUserAdmin(admin.ModelAdmin):
     #list
-	list_display = ['__str__','username','is_staff','last_login','date_joined']
+	list_display = ['__str__','id','username','is_staff','last_login','date_joined']
 	# search_fields = [
 	# 	'package',
    #    # 'last_login_longer_than_30_days',
