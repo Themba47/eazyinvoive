@@ -1,21 +1,55 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import React, { useContext, useState } from 'react';
+import { View, Text, TextInput, Alert, Button, StyleSheet } from 'react-native';
+import Toast from 'react-native-toast-message';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { AuthContext } from './AuthContext';
+import { fetchCsrfToken, getCsrfToken } from './CsrfService';
+import { backendApp } from '../utils';
+
 
 const LoginScreen: React.FC = ({ navigation }: any) => {
+  const { setAuthToken } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    if(email == 'thembasishuba11@gmail.com') {
+  const handleLogin = async () => {
+    try {
+      await fetchCsrfToken();
+      const response = await axios.post(`${backendApp()}/api/auth/login/`, {
+        email,
+        password,
+      },
+      {
+        headers: {
+            'X-CSRFToken': getCsrfToken(),
+        },
+        withCredentials: true, // Ensures cookies are sent with the request
+    });
+
+      const token = response.data.key;
+      setAuthToken(token);
+
+      // Show success toast
+    Toast.show({
+      type: 'success',
+      text1: 'Success',
+      text2: 'Logged in successfully!',
+    });
       navigation.navigate('Home');
+    } catch (e) {
+      console.error(e.response?.data || e.message);
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to log in. Please try again.',
+      });
     }
-    console.log('Logging in with:', email, password);
-    // Call your API here
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Log In</Text>
+      <Text style={styles.title}>Log In 3</Text>
       <TextInput
         style={styles.input}
         placeholder="Email"

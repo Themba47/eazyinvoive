@@ -1,10 +1,17 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import React, { useContext, useState } from 'react';
+import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
 // import {Picker} from '@react-native-picker/picker';
 import DropDownPicker from 'react-native-dropdown-picker';
+import Toast from 'react-native-toast-message';
+import axios from 'axios';
+import { fetchCsrfToken, getCsrfToken } from './CsrfService';
+import { AuthContext } from './AuthContext';
+import { backendApp } from '../utils';
 
 const RegisterScreen: React.FC = ({ navigation }: any) => {
+  const { setAuthToken } = useContext(AuthContext);
   const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
   const [firstname, setFirstname] = useState('');
   const [lastname, setLastname] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('');
@@ -24,15 +31,69 @@ const RegisterScreen: React.FC = ({ navigation }: any) => {
 	{ label: 'Brazil', value: 'Brazil' },
  ]); // Temporary hardcoded list of countries
 
-  const handleRegister = () => {
-	 console.log('Register:', email, firstname, lastname, selectedCountry, password);
-	 navigation.navigate('Home');
-	 // Call your API here
-  };
+//   const handleRegister = () => {
+// 	 console.log('Register:', email, firstname, lastname, selectedCountry, password);
+// 	 navigation.navigate('Home');
+// 	 // Call your API here
+//   };
+
+  const handleRegister = async () => {
+	await fetchCsrfToken();
+	console.log('Register:', email, firstname, lastname, selectedCountry, password);
+	if (password !== confirm_password) {
+	  Alert.alert('Error', 'Passwords do not match.');
+	  return;
+	}
+
+	try {
+	  const response = await axios.post(`${backendApp()}/api/auth/registration/`, {
+		 email,
+		 fist_name: firstname,
+		 last_name: lastname,
+		 Country: selectedCountry,
+		 password1: password,
+		 password2: confirm_password,
+	  },
+	  {
+		headers: {
+			'X-CSRFToken': getCsrfToken(),
+		},
+		withCredentials: true, // Ensures cookies are sent with the request
+	}
+	);
+
+	  const token = response.data.key;
+     setAuthToken(token);
+	  // Show success toast
+	  Toast.show({
+      type: 'success',
+      text1: 'Success',
+      text2: 'Registration successful!',
+    });
+	  navigation.navigate('Home');
+	} catch (error) {
+		if (error.response) {
+		  // Extract the error messages from the response
+		  const errors = error.response.data;
+  
+		  if (errors.email) {
+			 Alert.alert('Registration Error', errors.email[0]);
+		  } else if (errors.password) {
+			 Alert.alert('Registration Error', errors.password[0]);
+		  } else {
+			 Alert.alert(`Registration Error', 'An unknown error occurred. ${errors.email[0]}`);
+			 console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n")
+			 console.log(error.response)
+		  }
+		} else {
+		  Alert.alert('Error', 'Failed to connect to the server. Please try again.');
+		}
+	 }
+ };
 
   return (
 	 <View style={styles.container}>
-		<Text style={styles.title}>Log In</Text>
+		<Text style={styles.title}>Sign Up 5</Text>
 		<TextInput
 		  style={styles.input}
 		  placeholder="Email"
@@ -41,6 +102,7 @@ const RegisterScreen: React.FC = ({ navigation }: any) => {
 		  keyboardType="email-address"
 		  autoCapitalize="none"
 		/>
+		{emailError ? <Text style={styles.error}>{emailError}</Text> : null}
 		<TextInput
 		  style={styles.input}
 		  placeholder="First Name"

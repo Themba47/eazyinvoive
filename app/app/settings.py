@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-8mz93#hhc@#cxc1!t^83t$6)j_ar28_7c8qn=p2wbz=mji-q@p
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG')
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['192.168.1.105', 'localhost', '127.0.0.1'] # ['*']
 
 
 # Application definition
@@ -55,6 +55,9 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.microsoft',
     'corsheaders',
     'rest_framework',
+    'rest_framework.authtoken',
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
 ]
 
 MIDDLEWARE = [
@@ -84,12 +87,14 @@ CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGIN = [
     "http://127.0.0.1:8081",
+    "http://192.168.1.105:8083",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-	"http://localhost:8000",
-	"http://127.0.0.1:8081",
+	"http://localhost:8083",
+	"http://127.0.0.1:8083",
 	"https://www.moloai.com",
+    "http://192.168.1.105:8083",
 ]
 
 HEALTH_CHECK = {
@@ -110,7 +115,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'luna.context_processor.price'
+                # 'core.context_processor.price'
             ],
         },
     },
@@ -170,6 +175,18 @@ ACCOUNT_FORMS = {
 }
 
 AUTH_USER_MODEL = 'myaccount.CustomUser'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+}
+
+REST_AUTH = {
+    'REGISTER_SERIALIZER': 'myaccount.serializer.CustomRegisterSerializer',
+}
+
 
 SESSION_COOKIE_AGE = 24 * 60*60 #24h
 PASSWORD_RESET_TIMEOUT = 3 * (24 * 60*60) #days
