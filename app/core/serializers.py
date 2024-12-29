@@ -5,10 +5,12 @@ class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
         fields = [
+            'id',  # Include the primary key
             'company_name', 'company_code', 'company_type', 'reg_number',
             'tax_number', 'contact_number', 'contact_email', 'logo',
             'other_vital_info', 'details', 'user_id', 'date_updated', 'date_created', 'Active'
         ]
+        read_only_fields = ['id', 'company_code', 'Active', 'date_created', 'date_updated']
         
     # Custom validation for company_type field to handle 'Freelancer' and 'Informal' scenarios
     def validate(self, data):

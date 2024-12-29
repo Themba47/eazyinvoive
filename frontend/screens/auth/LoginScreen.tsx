@@ -28,7 +28,8 @@ const LoginScreen: React.FC = ({ navigation }: any) => {
       console.log(response.data)
       const token = response.data.key;
       setAuthToken(token);
-      setUserId(response.data.user_id)
+      console.log(typeof response.data.user_id)
+      setUserId(response.data.user_id.toString())
 
 
       // Show success toast

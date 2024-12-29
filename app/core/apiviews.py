@@ -97,9 +97,12 @@ class CompanyView(APIView):
 
     def post(self, request, *args, **kwargs):
         # Handle the creation of a new company
-        serializer = CompanySerializer(data=request.data)
-        if serializer.is_valid():
-            # Save the company and associate it with the logged-in user
-            serializer.save(user_id=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+           serializer = CompanySerializer(data=request.data)
+           if serializer.is_valid():
+              company = serializer.save(user_id=request.user)
+              response_serializer = CompanySerializer(company)
+              return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+           return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+           logging.error(f'Error: {e}')

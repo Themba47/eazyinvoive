@@ -8,10 +8,11 @@ import { backendApp } from '../utils';
 
 export default ({ route, navigation }) => {
   const { selectedValue } = route.params; // Retrieve selected company type
-  const { setCompanyId} = useContext(AuthContext);
+  const { setCompanyId, userId} = useContext(AuthContext);
   const [formData, setFormData] = useState({
     company_name: '',
     company_type: selectedValue,
+	 user_id: userId,
     reg_number: '',
     tax_number: '',
     contact_number: '',
@@ -43,7 +44,7 @@ export default ({ route, navigation }) => {
   };
 
   const submitForm = async () => {
-    console.log('Form data to submit:', formData);
+   //  console.log('Form data to submit:', formData);
     // Call the backend API to save the company data
     try {
       await fetchCsrfToken();
@@ -54,8 +55,8 @@ export default ({ route, navigation }) => {
         },
         withCredentials: true, // Ensures cookies are sent with the request
     });
-      console.log(response.data)
-      setCompanyId(response.data.company_id)
+	 console.log('Response:', response.data);
+      setCompanyId(response.data.id.toString())
 
 
       // Show success toast
@@ -64,7 +65,7 @@ export default ({ route, navigation }) => {
       text1: 'Success',
       text2: 'Logged in successfully!',
     });
-    navigation.navigate('CompanyPage1'); //navigation.navigate('Home');
+    navigation.navigate('LogoForm');
     } catch (e) {
       console.error(e.response?.data || e.message);
       Toast.show({

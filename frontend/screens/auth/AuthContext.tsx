@@ -40,6 +40,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const storeCompanyId = await AsyncStorage.getItem('companyId')
         setAuthTokenState(token);
         setUserIdState(storedUserId);
+        setCompanyIdState(storeCompanyId)
       } catch (error) {
         console.error('Failed to load auth data', error);
       }
@@ -80,7 +81,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } else {
         await AsyncStorage.removeItem('companyId');
       }
-      setUserIdState(userId);
+      setCompanyIdState(companyId);
     } catch (error) {
       console.error('Failed to set company ID', error);
     }
