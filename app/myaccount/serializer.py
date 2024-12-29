@@ -1,5 +1,8 @@
+import logging
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from rest_framework import serializers
+
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class CustomRegisterSerializer(RegisterSerializer):
     # Add the additional fields from your CustomSignupForm
@@ -26,7 +29,7 @@ class CustomRegisterSerializer(RegisterSerializer):
             user = super().save(request)
             
             # Debug: Check if the user object is created
-            print("USER CREATED:", user)
+            logging.info("USER CREATED:", user)
             
             # Set additional fields
             user.first_name = self.cleaned_data.get('first_name', '')
@@ -37,10 +40,10 @@ class CustomRegisterSerializer(RegisterSerializer):
             user.save()
             
             # Debug: Confirm user save
-            print("USER SAVED SUCCESSFULLY:", user)
+            logging.info("USER SAVED SUCCESSFULLY:", user, "FROM:", user.Country)
             
             return user
         except Exception as e:
             # Debug: Print the exception
-            print("ERROR IN SAVE METHOD:", str(e))
+            logging.error("ERROR IN SAVE METHOD:", str(e))
             raise e

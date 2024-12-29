@@ -1,9 +1,5 @@
+import logging
 from django.shortcuts import render
 
-from django.middleware.csrf import get_token
-from django.http import JsonResponse
-
-def csrf_token_view(request):
-   token = get_token(request)
-   return JsonResponse({'csrfToken': token})
-
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+# logging.info(f"Custom Response: {custom_response}")

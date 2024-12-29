@@ -26,7 +26,7 @@ const LoginScreen: React.FC = ({ navigation }: any) => {
         },
         withCredentials: true, // Ensures cookies are sent with the request
     });
-
+      console.log(response.data)
       const token = response.data.key;
       setAuthToken(token);
 
@@ -49,7 +49,7 @@ const LoginScreen: React.FC = ({ navigation }: any) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Log In 3</Text>
+      <Text style={styles.title}>Log In 1</Text>
       <TextInput
         style={styles.input}
         placeholder="Email"

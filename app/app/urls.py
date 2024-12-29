@@ -16,13 +16,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from core.views import csrf_token_view
+from core.apiviews import csrf_token_view, CustomRegisterView, CustomLoginView, CustomLogoutView
 
 urlpatterns = [
     path('kwam/', admin.site.urls),
     path("accounts/", include("allauth.urls")),
-    path('api/auth/', include('dj_rest_auth.urls')),  # Login/logout
-    path('api/auth/registration/', include('dj_rest_auth.registration.urls')),  # Registration
+    # path('api/auth/', include('dj_rest_auth.urls')),  # Login/logout
+    path('api/auth/login/', CustomLoginView.as_view(), name='custom-login'),
+    path('api/auth/logout/', CustomLogoutView.as_view(), name='custom_logout'),
+    path('api/auth/registration/', CustomRegisterView.as_view(), name='custom-register'),
     
     path('api/csrf/', csrf_token_view, name='csrf'),
 ]
