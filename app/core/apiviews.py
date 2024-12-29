@@ -1,12 +1,17 @@
 import logging
-from django.shortcuts import render
 
-from django.middleware.csrf import get_token
 from django.http import JsonResponse
+from django.middleware.csrf import get_token
+from django.shortcuts import render, get_object_or_404
 from dj_rest_auth.views import LoginView, LogoutView
 from dj_rest_auth.registration.views import RegisterView
 
+from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.exceptions import NotFound
+from .models import Company
+from .serializers import CompanySerializer
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -74,3 +79,27 @@ class CustomLogoutView(LogoutView):
         except Exception as e:
             logging.error(f"Error during logout: {e}")
             return Response({'error': 'An error occurred during logout.'}, status=500)
+         
+         
+class CompanyView(APIView):
+    
+    def get(self, request, company_id=None, *args, **kwargs):
+        # If company_id is provided, fetch the specific company
+        if company_id:
+            company = get_object_or_404(Company, pk=company_id)
+            serializer = CompanySerializer(company)
+            return Response(serializer.data)
+        
+        # If no company_id is provided, fetch all companies (optional)
+        companies = Company.objects.all()
+        serializer = CompanySerializer(companies, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, *args, **kwargs):
+        # Handle the creation of a new company
+        serializer = CompanySerializer(data=request.data)
+        if serializer.is_valid():
+            # Save the company and associate it with the logged-in user
+            serializer.save(user_id=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

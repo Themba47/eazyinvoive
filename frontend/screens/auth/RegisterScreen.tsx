@@ -9,7 +9,7 @@ import { AuthContext } from './AuthContext';
 import { backendApp } from '../utils';
 
 const RegisterScreen: React.FC = ({ navigation }: any) => {
-  const { setAuthToken } = useContext(AuthContext);
+  const { setAuthToken, setUserId } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
   const [firstname, setFirstname] = useState('');
@@ -64,13 +64,14 @@ const RegisterScreen: React.FC = ({ navigation }: any) => {
 	  console.log("Registration succesful")
 	  const token = response.data.key;
      setAuthToken(token);
+	  setUserId(response.data.user_id)
 	  // Show success toast
 	  Toast.show({
       type: 'success',
       text1: 'Success',
       text2: 'Registration successful!',
     });
-	  navigation.navigate('Home');
+	  navigation.navigate('CompanyPage1');
 	} catch (error) {
 		if (error.response) {
 		  // Extract the error messages from the response

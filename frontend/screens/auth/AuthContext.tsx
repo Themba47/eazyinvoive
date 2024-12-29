@@ -3,13 +3,21 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface AuthContextType {
   authToken: string | null;
+  userId: string | null;
+  companyId: string | null;
   setAuthToken: (token: string | null) => void;
+  setUserId: (userId: string | null) => void;
+  setCompanyId: (userId: string | null) => void;
   logout: () => void;
 }
 
 const defaultAuthContext: AuthContextType = {
   authToken: null,
+  userId: null,
+  companyId: null,
   setAuthToken: () => {},
+  setUserId: () => {},
+  setCompanyId: () => {},
   logout: () => {},
 };
 
@@ -21,17 +29,22 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [authToken, setAuthTokenState] = useState<string | null>(null);
+  const [userId, setUserIdState] = useState<string | null>(null);
+  const [companyId, setCompanyIdState] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadToken = async () => {
+    const loadAuthData = async () => {
       try {
         const token = await AsyncStorage.getItem('authToken');
+        const storedUserId = await AsyncStorage.getItem('userId');
+        const storeCompanyId = await AsyncStorage.getItem('companyId')
         setAuthTokenState(token);
+        setUserIdState(storedUserId);
       } catch (error) {
-        console.error('Failed to load auth token', error);
+        console.error('Failed to load auth data', error);
       }
     };
-    loadToken();
+    loadAuthData();
   }, []);
 
   const setAuthToken = async (token: string | null) => {
@@ -47,18 +60,49 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const setUserId = async (userId: string | null) => {
+    try {
+      if (userId) {
+        await AsyncStorage.setItem('userId', userId);
+      } else {
+        await AsyncStorage.removeItem('userId');
+      }
+      setUserIdState(userId);
+    } catch (error) {
+      console.error('Failed to set user ID', error);
+    }
+  };
+
+  const setCompanyId = async (companyId: string | null) => {
+    try {
+      if (companyId) {
+        await AsyncStorage.setItem('companyId', companyId);
+      } else {
+        await AsyncStorage.removeItem('companyId');
+      }
+      setUserIdState(userId);
+    } catch (error) {
+      console.error('Failed to set company ID', error);
+    }
+  };
+
   const logout = async () => {
     try {
       await AsyncStorage.removeItem('authToken');
+      await AsyncStorage.removeItem('userId');
+      await AsyncStorage.removeItem('companyId');
       setAuthTokenState(null);
+      setUserIdState(null);
+      setCompanyIdState(null)
     } catch (error) {
       console.error('Failed to logout', error);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ authToken, setAuthToken, logout }}>
+    <AuthContext.Provider value={{ authToken, userId, companyId, setAuthToken, setUserId, setCompanyId, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
+

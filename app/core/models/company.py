@@ -8,7 +8,7 @@ User = get_user_model()
 
 class Company(models.Model):
    # attr
-   ADDRESS_TYPES = [
+   COMPANY_TYPES = [
         ('Registered', 'Registered'),
         ('Freelancer', 'Freelancer'),
         ('Informal', 'Informal'),
@@ -17,14 +17,14 @@ class Company(models.Model):
    
    company_name = models.CharField(max_length = 500, blank=True, null=True, default=None, help_text='', unique=True)
    company_code = models.CharField(max_length = 6, help_text='ABC123', unique=True, verbose_name='Code')
-   company_type = models.CharField(max_length=10, choices=ADDRESS_TYPES, default='Other')
+   company_type = models.CharField(max_length=10, choices=COMPANY_TYPES, default='Other')
    reg_number = models.CharField(max_length = 100, blank=True, null=True, default=None, help_text='')
    tax_number = models.CharField(max_length = 100, blank=True, null=True, default=None, help_text='', unique=True)
    contact_number = models.CharField(max_length = 100, blank=True, null=True, default=None, help_text='', unique=True)
    contact_email = models.CharField(max_length = 100, blank=True, null=True, default=None, help_text='', unique=True)
    
    logo = models.FileField(upload_to=settings.COMPANY_LOGO, blank=True, null=True)
-   other_vital_info = models.TextField(blank = True, null=True, help_text='')
+   other_vital_info = models.JSONField(blank=True, null=True)
    details = models.TextField(blank = True, null=True, help_text='')
    user_id = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='User')
    date_updated = models.DateTimeField(auto_now=True, editable=False, verbose_name="Date updated")

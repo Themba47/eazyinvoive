@@ -1,7 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { View, Text, TextInput, Alert, Button, StyleSheet } from 'react-native';
 import Toast from 'react-native-toast-message';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { AuthContext } from './AuthContext';
 import { fetchCsrfToken, getCsrfToken } from './CsrfService';
@@ -9,7 +8,7 @@ import { backendApp } from '../utils';
 
 
 const LoginScreen: React.FC = ({ navigation }: any) => {
-  const { setAuthToken } = useContext(AuthContext);
+  const { setAuthToken, setUserId } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -29,6 +28,8 @@ const LoginScreen: React.FC = ({ navigation }: any) => {
       console.log(response.data)
       const token = response.data.key;
       setAuthToken(token);
+      setUserId(response.data.user_id)
+
 
       // Show success toast
     Toast.show({
@@ -36,7 +37,7 @@ const LoginScreen: React.FC = ({ navigation }: any) => {
       text1: 'Success',
       text2: 'Logged in successfully!',
     });
-      navigation.navigate('Home');
+    navigation.navigate('CompanyPage1'); //navigation.navigate('Home');
     } catch (e) {
       console.error(e.response?.data || e.message);
       Toast.show({
