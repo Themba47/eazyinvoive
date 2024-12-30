@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   View,
   Text,
@@ -8,8 +8,11 @@ import {
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
+import { AuthContext } from '../auth/AuthContext';
 
 const HomeScreen = () => {
+  const { authToken, companyId, userId, logout } = useContext(AuthContext);
+  console.log(`${authToken} Company: ${companyId} User: ${userId}`)
   const [selectedCard, setSelectedCard] = useState<number | null>(null); // Track selected card
 
   // Mock data for cards

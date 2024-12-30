@@ -1,5 +1,21 @@
 from rest_framework import serializers
-from .models import Company
+from .models import Address, Company
+
+
+class AddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Address
+        fields = [
+            'company_id',
+            'street',
+            'complex_apartment',
+            'city',
+            'province',
+            'postal_code',
+            'country',
+            'address_type',
+        ]
+
 
 class CompanySerializer(serializers.ModelSerializer):
     class Meta:
@@ -20,6 +36,12 @@ class CompanySerializer(serializers.ModelSerializer):
             if data.get('reg_number'):
                 raise serializers.ValidationError("Registration number should not be provided for Freelancer or Informal companies.")
         return data
+    
+ 
+class TaxCompanySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Company
+        fields = ['calculate_tax']  # Include only the `calculate_tax` field
     
 
 class CompanyLogoSerializer(serializers.ModelSerializer):

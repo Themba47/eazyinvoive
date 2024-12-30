@@ -22,14 +22,14 @@ class Company(models.Model):
    tax_number = models.CharField(max_length = 100, blank=True, null=True, default=None, help_text='', unique=True)
    contact_number = models.CharField(max_length = 100, blank=True, null=True, default=None, help_text='', unique=True)
    contact_email = models.CharField(max_length = 100, blank=True, null=True, default=None, help_text='', unique=True)
-   
+   country_of_operation = models.CharField(max_length = 100, blank=True, null=True, default=None, help_text='')
    logo = models.FileField(upload_to=settings.COMPANY_LOGO, blank=True, null=True)
    other_vital_info = models.JSONField(blank=True, null=True)
    details = models.TextField(blank = True, null=True, help_text='')
    user_id = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='User')
    date_updated = models.DateTimeField(auto_now=True, editable=False, verbose_name="Date updated")
    date_created = models.DateTimeField(auto_now_add=True, editable=False, verbose_name="Date created")
-   calulate_tax = models.BooleanField(default=False)
+   calculate_tax = models.BooleanField(default=False)
    Active = models.BooleanField(default=True)
    
    class Meta:

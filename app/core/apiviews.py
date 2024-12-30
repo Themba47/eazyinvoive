@@ -12,7 +12,7 @@ from rest_framework.views import APIView
 from rest_framework.exceptions import NotFound
 from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Company
-from .serializers import CompanySerializer, CompanyLogoSerializer
+from .serializers import AddressSerializer, CompanySerializer, CompanyLogoSerializer, TaxCompanySerializer
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -108,6 +108,27 @@ class CompanyView(APIView):
         except Exception as e:
            logging.error(f'Error: {e}')
            
+
+class TaxCompanyView(APIView):
+    
+    def post(self, request, *args, **kwargs):
+        company_id = request.data.get('company_id')  # Expecting `company_id` in the request payload
+        try:
+            if not company_id:
+                return Response({"error": "company_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Fetch the company instance
+            company = get_object_or_404(Company, id=company_id)
+            
+            # Pass the instance to the serializer for update
+            serializer = TaxCompanySerializer(company, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                logging.info({"message": "Tax uploaded successfully.", "calculate_tax": serializer.data['calculate_tax']})
+                return Response({"message": "Tax uploaded successfully.", "calculate_tax": serializer.data['calculate_tax']}, status=status.HTTP_200_OK)
+        except Exception as e:
+            logging.error(f'Error: {e}')
+           
            
 class UploadLogo(APIView):
     parser_classes = [MultiPartParser, FormParser]
@@ -129,3 +150,28 @@ class UploadLogo(APIView):
                 return Response({"message": "Logo uploaded successfully.", "logo_url": serializer.data['logo']}, status=status.HTTP_200_OK)
         except Exception as e:
             logging.error(f'Error: {e}')
+            
+            
+class AddressAPIView(APIView):
+    serializer_class = AddressSerializer
+
+    def get(self, request):
+        company_id = request.query_params.get('company_id')
+        if not company_id:
+            return Response({'error': 'company_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        addresses = Address.objects.filter(company_id=company_id)
+        serializer = self.serializer_class(addresses, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        company_id = request.data.get('company_id')
+        if not company_id:
+            return Response({'error': 'company_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+

@@ -65,7 +65,7 @@ export default ({ route, navigation }) => {
       text1: 'Success',
       text2: 'Logged in successfully!',
     });
-    navigation.navigate('LogoForm', { selectedValue });
+    navigation.navigate('AddressForm', { selectedValue });
     } catch (e) {
       console.error(e.response?.data || e.message);
       Toast.show({

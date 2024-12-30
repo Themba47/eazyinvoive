@@ -11,6 +11,7 @@ import HomeScreen from './screens/src/HomeScreen';
 import EditProfileScreen from './screens/src/EditProfileScreen';
 import CompanyPage1 from './screens/src/CompanyPage1';
 import CompanyForm from './screens/src/CompanyForm';
+import AddressForm from './screens/src/AddressForm';
 import LogoUploadScreen from './screens/src/LogoUploadScreen';
 import TaxToggleScreen from './screens/src/TaxToggleScreen';
 
@@ -29,6 +30,7 @@ const App: React.FC = () => {
           <Stack.Screen name="Profile" component={EditProfileScreen} />
           <Stack.Screen name="CompanyPage1" component={CompanyPage1} />
           <Stack.Screen name="CompanyForm" component={CompanyForm} />
+          <Stack.Screen name="AddressForm" component={AddressForm} />
           <Stack.Screen name="LogoForm" component={LogoUploadScreen} />
           <Stack.Screen name="TaxToggleScreen" component={TaxToggleScreen} />
           {/* Add other screens like Home, etc. */}
