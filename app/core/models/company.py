@@ -29,6 +29,7 @@ class Company(models.Model):
    user_id = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='User')
    date_updated = models.DateTimeField(auto_now=True, editable=False, verbose_name="Date updated")
    date_created = models.DateTimeField(auto_now_add=True, editable=False, verbose_name="Date created")
+   calulate_tax = models.BooleanField(default=False)
    Active = models.BooleanField(default=True)
    
    class Meta:

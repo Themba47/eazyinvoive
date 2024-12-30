@@ -51,7 +51,7 @@ const LoginScreen: React.FC = ({ navigation }: any) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Log In 1</Text>
+      <Text style={styles.title}>Log In</Text>
       <TextInput
         style={styles.input}
         placeholder="Email"

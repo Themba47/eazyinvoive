@@ -10,8 +10,9 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.exceptions import NotFound
+from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Company
-from .serializers import CompanySerializer
+from .serializers import CompanySerializer, CompanyLogoSerializer
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -106,3 +107,25 @@ class CompanyView(APIView):
            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
            logging.error(f'Error: {e}')
+           
+           
+class UploadLogo(APIView):
+    parser_classes = [MultiPartParser, FormParser]
+
+    def post(self, request, *args, **kwargs):
+        company_id = request.data.get('company_id')  # Expecting `company_id` in the request payload
+        try:
+            logging.info(f"_______ | {company_id} | __________")
+            if not company_id:
+                return Response({"error": "company_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Fetch the company instance
+            company = get_object_or_404(Company, id=company_id)
+            
+            # Pass the instance to the serializer for update
+            serializer = CompanyLogoSerializer(company, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({"message": "Logo uploaded successfully.", "logo_url": serializer.data['logo']}, status=status.HTTP_200_OK)
+        except Exception as e:
+            logging.error(f'Error: {e}')

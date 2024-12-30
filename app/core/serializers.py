@@ -20,3 +20,9 @@ class CompanySerializer(serializers.ModelSerializer):
             if data.get('reg_number'):
                 raise serializers.ValidationError("Registration number should not be provided for Freelancer or Informal companies.")
         return data
+    
+
+class CompanyLogoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Company
+        fields = ['logo']  # Include only the `logo` field
