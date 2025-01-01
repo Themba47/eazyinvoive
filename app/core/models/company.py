@@ -23,6 +23,7 @@ class Company(models.Model):
    contact_number = models.CharField(max_length = 100, blank=True, null=True, default=None, help_text='', unique=True)
    contact_email = models.CharField(max_length = 100, blank=True, null=True, default=None, help_text='', unique=True)
    country_of_operation = models.CharField(max_length = 100, blank=True, null=True, default=None, help_text='')
+   industry = models.CharField(max_length = 100, blank=True, null=True, default=None, help_text='')
    logo = models.FileField(upload_to=settings.COMPANY_LOGO, blank=True, null=True)
    other_vital_info = models.JSONField(blank=True, null=True)
    details = models.TextField(blank = True, null=True, help_text='')
