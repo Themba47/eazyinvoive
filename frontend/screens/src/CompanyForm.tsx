@@ -1,10 +1,11 @@
 import React, { useContext, useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import DropDownPicker from 'react-native-dropdown-picker';
 import Toast from 'react-native-toast-message';
 import axios from 'axios';
 import { AuthContext } from '../auth/AuthContext';
 import { fetchCsrfToken, getCsrfToken } from '../auth/CsrfService';
-import { backendApp } from '../utils';
+import { backendApp, industryType } from '../utils';
 
 export default ({ route, navigation }) => {
   const { selectedValue } = route.params; // Retrieve selected company type
@@ -19,7 +20,9 @@ export default ({ route, navigation }) => {
     contact_email: '',
     other_vital_info: [],
   });
-
+  const [selectedIndustryType, setSelectedIndustryType] = useState('');
+  const [open, setOpen] = useState(false); // To handle dropdown visibility
+  const [items, setItems] = useState(industryType()); // Temporary hardcoded list of countries
   const [newFieldKey, setNewFieldKey] = useState('');
   const [newFieldValue, setNewFieldValue] = useState('');
 
@@ -120,6 +123,20 @@ export default ({ route, navigation }) => {
         </>
       )}
 
+    <Text style={styles.title}>Select Industry</Text>
+		<DropDownPicker
+        open={open}
+        value={selectedIndustryType}
+        items={items}
+        setOpen={setOpen}
+        setValue={setSelectedIndustryType}
+        setItems={setItems}
+        placeholder="Select Industry"
+        containerStyle={styles.dropdownContainer}
+        style={styles.dropdown}
+        dropDownStyle={styles.dropdownList}
+      />
+
       <Text style={styles.label}>Tax Number (or VAT Number)</Text>
       <TextInput
         style={styles.input}
@@ -160,6 +177,11 @@ export default ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 16,
+  },
   container: {
     padding: 20,
   },
@@ -208,5 +230,17 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
+  dropdownContainer: {
+    marginBottom: 20,
+   },
+    dropdown: {
+    backgroundColor: '#fafafa',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+   },
+   dropdownList: {
+    backgroundColor: '#fafafa',
+   },
 });
 
