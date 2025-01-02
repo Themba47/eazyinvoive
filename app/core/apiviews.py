@@ -11,8 +11,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.exceptions import NotFound
 from rest_framework.parsers import MultiPartParser, FormParser
-from .models import Company
-from .serializers import AddressSerializer, CompanySerializer, CompanyLogoSerializer, TaxCompanySerializer
+from .models import Address, Company, Job
+from .serializers import AddressSerializer, CompanySerializer, CompanyLogoSerializer, JobSerializer, TaxCompanySerializer
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -29,7 +29,6 @@ class CustomRegisterView(RegisterView):
 
             # Get the registered user
             user = self.get_user()
-
             # Modify the response to include additional fields
             custom_response = {
                 'key': response.data.get('key'),  # Authentication key
@@ -50,19 +49,29 @@ class CustomRegisterView(RegisterView):
 
 class CustomLoginView(LoginView):
     def get_response(self):
-        logging.info("-------- WE LOGGING IN ----------")
-        original_response = super().get_response()
-        user = self.user
-        
-        # Add custom fields to the response
-        custom_data = {
-            'key': original_response.data['key'],
-            'user_id': user.id,
-            'email': user.email,
-            'first_name': user.first_name,
-            'last_name': user.last_name,
-        }
-        return Response(custom_data)
+        try:
+            logging.info("-------- WE LOGGING IN ----------")
+            original_response = super().get_response()
+            company_id = None
+            user = self.user
+            
+            company = Company.objects.filter(user_id=user.id).first()
+            if company:
+                company_id = company.id
+            
+            # Add custom fields to the response
+            custom_data = {
+                'key': original_response.data['key'],
+                'user_id': user.id,
+                'email': user.email,
+                'company_id': company_id,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+            }
+            return Response(custom_data)
+        except Exception as e:
+            logging.error(f"Error during registration: {e}")
+            return Response({'error': 'An error occurred during registration.'}, status=status.HTTP_400_BAD_REQUEST)
      
      
 class CustomLogoutView(LogoutView):
@@ -175,3 +184,36 @@ class AddressAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+class AddJobAPIView(APIView):
+    serializer_class = JobSerializer
+    def post(self, request):
+        user_id = request.data.get('user_id')
+        logging.info(f"<----------- WE IN ADD SERVICE {user_id} ---------->")
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+
+class JobsAPIView(APIView):
+   def get(self, request, user_id=None, *args, **kwargs):
+      
+      try:      
+         jobs = Job.objects.filter(user_id=user_id)
+         
+         serializer = JobSerializer(jobs, many=True)
+         
+         data = {
+            'message': 'LETS GET THE BAG!!!',
+            'myjobs': serializer.data,
+         }
+         
+         return Response(data=data, status=status.HTTP_201_CREATED)
+      except Exception as e:
+            logging.error(f'Error: {e}')
+        
+   def post(self, request, *args, **kwargs):
+      pass

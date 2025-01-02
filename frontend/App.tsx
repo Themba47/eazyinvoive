@@ -14,6 +14,8 @@ import CompanyForm from './screens/src/CompanyForm';
 import AddressForm from './screens/src/AddressForm';
 import LogoUploadScreen from './screens/src/LogoUploadScreen';
 import TaxToggleScreen from './screens/src/TaxToggleScreen';
+import AddService from './screens/src/AddService';
+import MyJobsListScreen from './screens/src/MyJobsListScreen';
 
 const Stack = createStackNavigator();
 
@@ -33,6 +35,8 @@ const App: React.FC = () => {
           <Stack.Screen name="AddressForm" component={AddressForm} />
           <Stack.Screen name="LogoForm" component={LogoUploadScreen} />
           <Stack.Screen name="TaxToggleScreen" component={TaxToggleScreen} />
+          <Stack.Screen name="AddService" component={AddService} />
+          <Stack.Screen name="MyJobsListScreen" component={MyJobsListScreen} />
           {/* Add other screens like Home, etc. */}
         </Stack.Navigator>
       </NavigationContainer>

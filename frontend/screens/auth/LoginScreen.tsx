@@ -8,7 +8,7 @@ import { backendApp } from '../utils';
 
 
 const LoginScreen: React.FC = ({ navigation }: any) => {
-  const { setAuthToken, setUserId } = useContext(AuthContext);
+  const { setAuthToken, setUserId, setCompanyId } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -28,7 +28,6 @@ const LoginScreen: React.FC = ({ navigation }: any) => {
       console.log(response.data)
       const token = response.data.key;
       setAuthToken(token);
-      console.log(typeof response.data.user_id)
       setUserId(response.data.user_id.toString())
 
 
@@ -38,7 +37,12 @@ const LoginScreen: React.FC = ({ navigation }: any) => {
       text1: 'Success',
       text2: 'Logged in successfully!',
     });
-    navigation.navigate('CompanyPage1'); //navigation.navigate('Home');
+    if(response.data.company_id) {
+      setCompanyId(response.data.company_id.toString())
+      navigation.navigate('Home');
+    } else {
+      navigation.navigate('CompanyPage1'); //navigation.navigate('Home');
+    }
     } catch (e) {
       console.error(e.response?.data || e.message);
       Toast.show({

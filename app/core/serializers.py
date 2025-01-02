@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Address, Company
+from .models import Address, Company, Job
 
 
 class AddressSerializer(serializers.ModelSerializer):
@@ -48,3 +48,10 @@ class CompanyLogoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
         fields = ['logo']  # Include only the `logo` field
+        
+        
+class JobSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Job
+        fields = ['id', 'user_id','description','price','job_type']
+        read_only_fields = ['id']

@@ -6,11 +6,11 @@ import { fetchCsrfToken, getCsrfToken } from '../auth/CsrfService';
 import { AuthContext } from '../auth/AuthContext';
 import { backendApp } from '../utils';
 
-type TaxToggleProps = {
-  selectedValue: string; // Pass 'Registered' or any other string to indicate company type
-};
+// type TaxToggleProps = {
+//   selectedValue: string; // Pass 'Registered' or any other string to indicate company type
+// };
 
-const TaxToggleScreen: React.FC<TaxToggleProps> = ({ route, navigation }) => {
+export default ({ route, navigation }) => {
   const { selectedValue } = route.params; // Retrieve selected company type
   const { companyId } = useContext(AuthContext);
   const [isTaxIncluded, setIsTaxIncluded] = useState(false);
@@ -42,7 +42,7 @@ const TaxToggleScreen: React.FC<TaxToggleProps> = ({ route, navigation }) => {
 			text1: 'Success',
 			text2: 'Lets Go',
 		 });
-	navigation.navigate('Home');
+	navigation.navigate('AddService');
   }
 
   return (
@@ -95,5 +95,3 @@ const styles = StyleSheet.create({
     color: '#555',
   },
 });
-
-export default TaxToggleScreen;

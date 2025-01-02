@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from core.apiviews import csrf_token_view, AddressAPIView, CompanyView, CustomRegisterView, CustomLoginView, CustomLogoutView, UploadLogo, TaxCompanyView
+from core.apiviews import csrf_token_view, AddJobAPIView, AddressAPIView, CompanyView, CustomRegisterView, CustomLoginView, CustomLogoutView, JobsAPIView, UploadLogo, TaxCompanyView
 
 urlpatterns = [
     path('kwam/', admin.site.urls),
@@ -25,6 +25,8 @@ urlpatterns = [
     path('api/auth/login/', CustomLoginView.as_view(), name='custom-login'),
     path('api/auth/logout/', CustomLogoutView.as_view(), name='custom_logout'),
     path('api/auth/registration/', CustomRegisterView.as_view(), name='custom-register'),
+    path('api/add-job/', AddJobAPIView.as_view(), name="add-job"),
+    path('api/jobs/<int:user_id>/', JobsAPIView.as_view(), name="jobs"),
     path('api/address/', AddressAPIView.as_view(), name='create-address'),
     path('api/company/', CompanyView.as_view(), name='company_create_get'),  # For POST and GET all companies
     path('api/update-company-tax/', TaxCompanyView.as_view(), name='company_update_tax'),

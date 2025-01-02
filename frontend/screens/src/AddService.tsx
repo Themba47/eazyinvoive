@@ -1,33 +1,50 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import axios from "axios";
+import Toast from 'react-native-toast-message';
+import { fetchCsrfToken, getCsrfToken } from '../auth/CsrfService';
+import { AuthContext } from '../auth/AuthContext';
 import { backendApp } from '../utils';
 
-export default({navigation}) => {
+export default({ navigation }) => {
+  const { userId } = useContext(AuthContext);
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [selectedOption, setSelectedOption] = useState(null);
 
-  const options = ["Option 1", "Option 2", "Option 3"];
+  const options = ["Service", "Product"];
 
   const handleSubmit = async () => {
+	 await fetchCsrfToken();
     if (!description || !price || selectedOption === null) {
       Alert.alert("Error", "Please fill out all fields.");
       return;
     }
 
     const formData = {
+		user_id: userId,
       description,
       price,
-      selectedOption,
+      job_type: selectedOption,
     };
 
     try {
-      const response = await axios.post("https://your-api-endpoint.com/submit", formData);
-      Alert.alert("Success", "Form submitted successfully!");
+      const response = await axios.post(`${backendApp()}/api/add-job/`, formData, 
+		{
+			  headers: {
+					'X-CSRFToken': getCsrfToken(),
+			  },
+		 });
+		console.log('Response:', response.data);
+      Toast.show({
+					type: 'success',
+					text1: 'Success',
+					text2: 'Lets Go',
+				 });
+		navigation.navigate('Home');
     } catch (error) {
       console.error(error);
-      Alert.alert("Error", "Failed to submit the form.");
+      Alert.alert("Error", `Failed to submit the form because. ${error}`);
     }
   };
 
@@ -47,10 +64,10 @@ export default({navigation}) => {
         value={price}
         onChangeText={setPrice}
         placeholder="Enter price"
-        keyboardType="numeric"
+        keyboardType="decimal-pad"
       />
 
-      <Text style={styles.label}>Select an Option:</Text>
+      <Text style={styles.label}>Select Job Type:</Text>
       <View style={styles.optionsContainer}>
         {options.map((option, index) => (
           <TouchableOpacity

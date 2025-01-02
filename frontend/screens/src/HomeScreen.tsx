@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { AuthContext } from '../auth/AuthContext';
 
-const HomeScreen = () => {
+const HomeScreen = ({navigation}) => {
   const { authToken, companyId, userId, logout } = useContext(AuthContext);
   console.log(`${authToken} Company: ${companyId} User: ${userId}`)
   const [selectedCard, setSelectedCard] = useState<number | null>(null); // Track selected card
@@ -29,6 +29,10 @@ const HomeScreen = () => {
       <View style={styles.row30}>
         <Text style={styles.pointsText}>Current Points: 1200</Text>
       </View>
+
+      <Text onPress={() => navigation.navigate('MyJobsListScreen')}>
+            View My Jobs
+      </Text>
 
       {/* Second Row: Scrollable Cards */}
       <View style={styles.row70}>

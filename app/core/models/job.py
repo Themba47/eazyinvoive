@@ -1,4 +1,5 @@
 import hashlib
+from django.contrib import admin
 from django.db import models
 
 from core.utils import * 
@@ -24,5 +25,15 @@ class Job(models.Model):
    class Meta:
       verbose_name = 'Job'
    
-   # def __str__(self):
-   #    return f"{self.company_name}"
+   def __str__(self):
+      return f"{self.user_id.username}"
+   
+   
+class JobAdmin(admin.ModelAdmin):
+    #list
+	list_display = ['__str__','id','description','Active','price']
+	# search_fields = [
+	# 	'package',
+   #    # 'last_login_longer_than_30_days',
+	# ]
+	# list_filter = ['Project','Language']
