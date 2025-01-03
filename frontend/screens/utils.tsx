@@ -3,6 +3,19 @@ export function backendApp() {
 	return 'http://192.168.1.105:8083'
 }
 
+export const getPaperSize = (paperSize: string): [number, number] => {
+	const sizes: Record<string, [number, number]> = {
+	  A4: [595.28, 841.89], // 8.27 x 11.69 inches
+	  Letter: [612, 792], // 8.5 x 11 inches
+	  Legal: [612, 1008], // 8.5 x 14 inches
+	  Tabloid: [792, 1224], // 11 x 17 inches
+	  Executive: [522, 756], // 7.25 x 10.5 inches
+	};
+ 
+	return sizes[paperSize] || sizes['A4']; // Default to A4 if size is not found
+ };
+ 
+
 export function industryType() {
 	return [
 		{ label: "Agriculture", value: "Agriculture" },

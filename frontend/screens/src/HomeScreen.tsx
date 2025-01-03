@@ -30,7 +30,7 @@ const HomeScreen = ({navigation}) => {
         <Text style={styles.pointsText}>Current Points: 1200</Text>
       </View>
 
-      <Text onPress={() => navigation.navigate('MyJobsListScreen')}>
+      <Text onPress={() => navigation.navigate('InvoiceSetup')}>
             View My Jobs
       </Text>
 

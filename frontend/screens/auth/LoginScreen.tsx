@@ -39,7 +39,7 @@ const LoginScreen: React.FC = ({ navigation }: any) => {
     });
     if(response.data.company_id) {
       setCompanyId(response.data.company_id.toString())
-      navigation.navigate('Home');
+      navigation.navigate('Main');
     } else {
       navigation.navigate('CompanyPage1'); //navigation.navigate('Home');
     }
