@@ -26,7 +26,7 @@ const HomeScreen = ({navigation}) => {
   return (
     <View style={styles.container}>
       {/* First Row: Current Points */}
-      <View style={styles.row30}>
+      <View style={styles.row20}>
         <Text style={styles.pointsText}>Current Points: 1200</Text>
       </View>
 
@@ -35,11 +35,10 @@ const HomeScreen = ({navigation}) => {
       </Text>
 
       {/* Second Row: Scrollable Cards */}
-      <View style={styles.row70}>
+      <View style={styles.row80}>
         <FlatList
           data={cards}
           keyExtractor={(item) => item.id.toString()}
-          horizontal
           showsHorizontalScrollIndicator={false}
           renderItem={({ item }) => (
             <TouchableOpacity
@@ -64,13 +63,15 @@ const HomeScreen = ({navigation}) => {
   );
 };
 
+const screen_width = Dimensions.get('window').width
+const screen_height = Dimensions.get('window').height
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
   },
-  row30: {
-    flex: 3, // 30% height
+  row20: {
+    flex: 2, // 30% height
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#f7f7f7',
@@ -80,14 +81,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
   },
-  row70: {
-    flex: 7, // 70% height
+  row80: {
+    flex: 8, // 70% height
+    margin: 10,
     paddingVertical: 10,
   },
   card: {
-    width: Dimensions.get('window').width * 0.6,
+    width: screen_width,
     height: '90%',
-    marginHorizontal: 10,
     borderRadius: 10,
     overflow: 'hidden',
   },
