@@ -23,3 +23,25 @@ Copy code
 npx react-native run-android
 # or
 npx react-native run-ios
+
+
+ios parameter will take care of adding queries (LSApplicationQueriesSchemes) to the Info.plist.
+
+<key>LSApplicationQueriesSchemes</key>
+<array>
+  <string>fb</string>
+  <string>instagram</string>
+  <string>twitter</string>
+  <string>tiktoksharesdk</string>
+</array>
+
+android parameter will take care of adding queries to the AndroidManifest.xml.
+
+<queries>
+  <package android:name="com.facebook.katana" />
+  <package android:name="com.instagram.android" />
+  <package android:name="com.twitter.android" />
+  <package android:name="com.zhiliaoapp.musically" />
+</queries>
+
+And prebuild the project with expo prebuild.
