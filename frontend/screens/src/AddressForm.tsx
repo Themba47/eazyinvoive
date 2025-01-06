@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, FlatList, Alert } from 'react-native';
-import DropDownPicker from 'react-native-dropdown-picker';
+import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { fetchCsrfToken, getCsrfToken } from '../auth/CsrfService';
 import axios from 'axios';
+import ReusableModalPicker from '../components/OptionsScreen';
 import { AuthContext } from '../auth/AuthContext'; // Adjust the path based on your project structure
 import { backendApp } from '../utils';
 
@@ -20,13 +20,12 @@ export default ({ route, navigation }) => {
     country: '',
     address_type: 'Other',
   });
-  const [open, setOpen] = useState(false); // To handle dropdown visibility
-  const [items, setItems] = useState([
-	{ label: 'Home', value: 'Home' },
-	{ label: 'Office', value: 'Office' },
-	{ label: 'Warehouse', value: 'Warehouse' },
-	{ label: 'Other', value: 'Other' },
-	]); // Temporary hardcoded list of countries
+   const options = ['Home', 'Office', 'Warehouse']
+   const [selectedOption, setSelectedOption] = useState(null);
+
+  const handleSelect = (address_type) => {
+		setSelectedAddressType(address_type.value);
+	};
 
   const handleSubmit = async () => {
 	await fetchCsrfToken();
@@ -42,15 +41,15 @@ export default ({ route, navigation }) => {
 		});
       Alert.alert('Success', 'Address added successfully');
 		navigation.navigate('LogoForm', { selectedValue });
-      // setForm({
-      //   street: '',
-      //   complex_apartment: '',
-      //   city: '',
-      //   province: '',
-      //   postal_code: '',
-      //   country: '',
-      //   address_type: 'Other',
-      // });
+      setForm({
+        street: '',
+        complex_apartment: '',
+        city: '',
+        province: '',
+        postal_code: '',
+        country: '',
+        address_type: 'Other',
+      });
     } catch (error) {
       console.error('Error submitting address:', error.response?.data || error.message);
       Alert.alert('Error', 'Failed to submit address. Please try again.');
@@ -60,18 +59,29 @@ export default ({ route, navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Add Company Address</Text>
-		<DropDownPicker
-        open={open}
-        value={selectedAddressType}
-        items={items}
-        setOpen={setOpen}
-        setValue={setSelectedAddressType}
-        setItems={setItems}
-        placeholder="Select Address"
-        containerStyle={styles.dropdownContainer}
-        style={styles.dropdown}
-        dropDownStyle={styles.dropdownList}
-      />
+      <Text style={styles.label}>Select Address Type:</Text>
+      <View style={styles.optionsContainer}>
+              {options.map((option, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.option,
+                    selectedAddressType === option ? styles.selectedOption : null,
+                  ]}
+                  onPress={() => setSelectedAddressType(option)}
+                >
+                  <Text
+                    style={[
+                      styles.optionText,
+                      selectedAddressType === option ? styles.selectedOptionText : null,
+                    ]}
+                  >
+                    {option}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+      
       <TextInput
         style={styles.input}
         placeholder="Street"
@@ -108,6 +118,7 @@ export default ({ route, navigation }) => {
         value={form.country}
         onChangeText={(value) => setForm({ ...form, country: value })}
       />
+      
       <Button title="Submit" onPress={handleSubmit} />
       <FlatList
         data={addresses}
@@ -132,6 +143,10 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 16,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 8,
   },
   input: {
     borderWidth: 1,
@@ -158,4 +173,28 @@ const styles = StyleSheet.create({
  dropdownList: {
 	backgroundColor: '#fafafa',
  },
+ optionsContainer: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  marginBottom: 16,
+},
+option: {
+  padding: 10,
+  borderWidth: 1,
+  borderColor: "#ccc",
+  borderRadius: 5,
+  flex: 1,
+  marginHorizontal: 5,
+  alignItems: "center",
+},
+selectedOption: {
+  backgroundColor: "#007BFF",
+},
+optionText: {
+  fontSize: 14,
+  color: "#000",
+},
+selectedOptionText: {
+  color: "#fff",
+},
 });

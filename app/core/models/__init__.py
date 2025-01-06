@@ -1,4 +1,5 @@
 from .address import Address
+from .bill_to import BillTo
 from .company import Company
 from .created_invoice import CreatedInvoice
 from .invoice_template import InvoiceTemplate

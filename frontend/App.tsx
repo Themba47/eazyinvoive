@@ -35,8 +35,7 @@ const TabNavigator = () => (
 
         if (route.name === 'Home') iconName = 'home-outline';
         else if (route.name === 'My Jobs') iconName = 'search-outline';
-        else if (route.name === 'Send Invoice') iconName = 'qr-code-outline';
-        else if (route.name === 'ViewTokens') iconName = 'wallet-outline';
+        else if (route.name === 'Send Invoice') iconName = 'create';
         else if (route.name === 'Profile') iconName = 'person-outline';
 
         return <Ionicons name={iconName as string} size={size} color={color} />;

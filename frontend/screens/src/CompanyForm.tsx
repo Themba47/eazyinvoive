@@ -1,8 +1,8 @@
 import React, { useContext, useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import DropDownPicker from 'react-native-dropdown-picker';
 import Toast from 'react-native-toast-message';
 import axios from 'axios';
+import ReusableModalPicker from '../components/OptionsScreen';
 import { AuthContext } from '../auth/AuthContext';
 import { fetchCsrfToken, getCsrfToken } from '../auth/CsrfService';
 import { backendApp, industryType } from '../utils';
@@ -13,7 +13,8 @@ export default ({ route, navigation }) => {
   const [formData, setFormData] = useState({
     company_name: '',
     company_type: selectedValue,
-	 user_id: userId,
+	  user_id: userId,
+    industry: '',
     reg_number: '',
     tax_number: '',
     contact_number: '',
@@ -21,8 +22,8 @@ export default ({ route, navigation }) => {
     other_vital_info: [],
   });
   const [selectedIndustryType, setSelectedIndustryType] = useState('');
-  const [open, setOpen] = useState(false); // To handle dropdown visibility
   const [items, setItems] = useState(industryType()); // Temporary hardcoded list of countries
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [newFieldKey, setNewFieldKey] = useState('');
   const [newFieldValue, setNewFieldValue] = useState('');
 
@@ -40,6 +41,12 @@ export default ({ route, navigation }) => {
   const handleInputChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
   };
+  
+  const handleSelect = (industry) => {
+    setSelectedIndustryType(industry.value);
+    handleInputChange('industry', industry.value)
+    setIsModalVisible(false); // Close the modal after selection
+  };
 
   const deleteVitalInfo = (index) => {
     const updatedInfo = formData.other_vital_info.filter((_, i) => i !== index);
@@ -49,6 +56,7 @@ export default ({ route, navigation }) => {
   const submitForm = async () => {
    //  console.log('Form data to submit:', formData);
     // Call the backend API to save the company data
+    console.log(`COMPANY FORM >>>>>>>>> ${formData}`)
     try {
       await fetchCsrfToken();
       const response = await axios.post(`${backendApp()}/api/company/`, formData,
@@ -66,7 +74,7 @@ export default ({ route, navigation }) => {
     Toast.show({
       type: 'success',
       text1: 'Success',
-      text2: 'Logged in successfully!',
+      text2: 'Company created!',
     });
     navigation.navigate('AddressForm', { selectedValue });
     } catch (e) {
@@ -123,18 +131,21 @@ export default ({ route, navigation }) => {
         </>
       )}
 
-    <Text style={styles.title}>Select Industry</Text>
-		<DropDownPicker
-        open={open}
-        value={selectedIndustryType}
-        items={items}
-        setOpen={setOpen}
-        setValue={setSelectedIndustryType}
-        setItems={setItems}
-        placeholder="Select Industry"
-        containerStyle={styles.dropdownContainer}
-        style={styles.dropdown}
-        dropDownStyle={styles.dropdownList}
+    <Text style={styles.label}>Select Industry</Text>
+    <TouchableOpacity
+            style={styles.input}
+            onPress={() => setIsModalVisible(true)}
+          >
+        <Text style={styles.selectText}>
+          {selectedIndustryType || "Select an industry"}
+        </Text>
+    </TouchableOpacity>
+		<ReusableModalPicker
+        visible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+        options={items}
+        onSelect={handleSelect}
+        title="Select Industry"
       />
 
       <Text style={styles.label}>Tax Number (or VAT Number)</Text>
@@ -242,5 +253,15 @@ const styles = StyleSheet.create({
    dropdownList: {
     backgroundColor: '#fafafa',
    },
+   selectInput: {
+		padding: 15,
+		borderWidth: 1,
+		borderColor: "#ccc",
+		borderRadius: 5,
+		width: "80%",
+	 },
+	 selectText: {
+		fontSize: 16,
+	 },
 });
 

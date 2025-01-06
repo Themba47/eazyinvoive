@@ -1,10 +1,10 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, Alert, Modal, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 // import {Picker} from '@react-native-picker/picker';
-import DropDownPicker from 'react-native-dropdown-picker';
 import Toast from 'react-native-toast-message';
 import axios from 'axios';
 import { fetchCsrfToken, getCsrfToken } from './CsrfService';
+import ReusableModalPicker from '../components/OptionsScreen';
 import { AuthContext } from './AuthContext';
 import { backendApp } from '../utils';
 
@@ -18,6 +18,7 @@ const RegisterScreen: React.FC = ({ navigation }: any) => {
   const [password, setPassword] = useState('');
   const [confirm_password, setConfirm_password] = useState('');
   const [open, setOpen] = useState(false); // To handle dropdown visibility
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [items, setItems] = useState([
 	{ label: 'South Africa', value: 'South Africa' },
 	{ label: 'United States', value: 'United States' },
@@ -30,6 +31,11 @@ const RegisterScreen: React.FC = ({ navigation }: any) => {
 	{ label: 'Japan', value: 'Japan' },
 	{ label: 'Brazil', value: 'Brazil' },
  ]); // Temporary hardcoded list of countries
+
+	const handleSelect = (country) => {
+		setSelectedCountry(country.value);
+		setIsModalVisible(false); // Close the modal after selection
+	};
 
 //   const handleRegister = () => {
 // 	 console.log('Register:', email, firstname, lastname, selectedCountry, password);
@@ -119,18 +125,23 @@ const RegisterScreen: React.FC = ({ navigation }: any) => {
 		  keyboardType="default"
 		  autoCapitalize="none"
 		/>
-		<DropDownPicker
-        open={open}
-        value={selectedCountry}
-        items={items}
-        setOpen={setOpen}
-        setValue={setSelectedCountry}
-        setItems={setItems}
-        placeholder="Select a country"
-        containerStyle={styles.dropdownContainer}
-        style={styles.dropdown}
-        dropDownStyle={styles.dropdownList}
+		<TouchableOpacity
+        style={styles.input}
+        onPress={() => setIsModalVisible(true)}
+      >
+        <Text style={styles.selectText}>
+          {selectedCountry || "Select an option"}
+        </Text>
+      </TouchableOpacity>
+
+		<ReusableModalPicker
+        visible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+        options={items}
+        onSelect={handleSelect}
+        title="Select a country"
       />
+
 		<TextInput
 		  style={styles.input}
 		  placeholder="Password"
@@ -186,6 +197,16 @@ const styles = StyleSheet.create({
 	 },
 	 dropdownList: {
 		backgroundColor: '#fafafa',
+	 },
+	 selectInput: {
+		padding: 15,
+		borderWidth: 1,
+		borderColor: "#ccc",
+		borderRadius: 5,
+		width: "80%",
+	 },
+	 selectText: {
+		fontSize: 16,
 	 },
 });
 

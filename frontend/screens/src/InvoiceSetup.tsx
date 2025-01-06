@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, View } from 'react-native';
+import { Button, Dimensions, StyleSheet, View } from 'react-native';
 
 export default ({ navigation }) => {
   const data = {
@@ -8,11 +8,24 @@ export default ({ navigation }) => {
   };
 
   return (
-    <View>
-      <Button
-        title="Generate PDF"
-        onPress={() => navigation.navigate('Preview', { data })}
-      />
+    <View style={styles.container}>
+      <View style={styles.row90}></View>
+      <View style={styles.row10}>
+        <Button title='Create Invoice' onPress={() => navigation.navigate('AddService')} />
+      </View> 
     </View>
   );
 }
+
+const width = Dimensions.get("window").width; //full width
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  row90: {
+    flex: 9,
+  },
+  row10: {
+    flex: 1
+  }
+});
