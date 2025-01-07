@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useContext, useState } from 'react';
 import { Button, Dimensions, StyleSheet, View } from 'react-native';
 
 export default ({ navigation }) => {
+  const [billToVisible, setBillToVisible] = useState(false);
   const data = {
     name: 'John Doe',
     details: 'This is sample data for the PDF.',
