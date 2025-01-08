@@ -9,6 +9,7 @@ import { backendApp } from '../utils';
 export default ({ visible, onDismiss, onSuccess }) => {
   const { authToken, userId } = useContext(AuthContext);
   const [formData, setFormData] = useState({
+    user_id: userId,
     client_company_name: '',
     client_name: '',
     client_email: '',
@@ -25,13 +26,14 @@ export default ({ visible, onDismiss, onSuccess }) => {
   
   const [showOptionalFields, setShowOptionalFields] = useState(false);
   const [loading, setLoading] = useState(false);
-  const URL = `${backendApp}/api/billto/`
+  const URL = `${backendApp()}/api/billto`
 
   const handleSubmit = async () => {
     await fetchCsrfToken();
     setLoading(true);
     try {
-      const response = await axios.post(`${URL}/${userId}`, formData, {
+      console.log(formData)
+      const response = await axios.post(`${URL}/${userId}/`, formData, {
         headers: {
               'X-CSRFToken': getCsrfToken(),
             },
@@ -45,6 +47,8 @@ export default ({ visible, onDismiss, onSuccess }) => {
         'Error',
         error.response?.data?.message || 'Failed to save billing information'
       );
+      console.log(`${URL}/${userId}/`)
+      console.log(error)
     } finally {
       setLoading(false);
     }

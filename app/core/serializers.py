@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Address, Company, Job
+from .models import Address, BillTo, Company, Job
 
 
 class AddressSerializer(serializers.ModelSerializer):
@@ -53,5 +53,12 @@ class CompanyLogoSerializer(serializers.ModelSerializer):
 class JobSerializer(serializers.ModelSerializer):
     class Meta:
         model = Job
-        fields = ['id', 'user_id','description','price','job_type']
+        fields = ['id', 'job_name', 'user_id','description','price','job_type']
         read_only_fields = ['id']
+        
+        
+class BillToSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BillTo
+        fields = '__all__'
+        read_only_fields = ('created_at', 'updated_at')

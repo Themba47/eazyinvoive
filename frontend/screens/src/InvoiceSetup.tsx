@@ -12,7 +12,7 @@ export default ({ navigation }) => {
     <View style={styles.container}>
       <View style={styles.row90}></View>
       <View style={styles.row10}>
-        <Button title='Create Invoice' onPress={() => navigation.navigate('AddService')} />
+        <Button title='Create Invoice' onPress={() => navigation.navigate('CreateInvoice')} />
       </View> 
     </View>
   );

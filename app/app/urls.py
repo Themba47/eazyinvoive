@@ -16,10 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from core.apiviews import csrf_token_view, AddJobAPIView, AddressAPIView, CompanyView, CustomRegisterView, CustomLoginView, CustomLogoutView, JobsAPIView, UploadLogo, TaxCompanyView
+from core.apiviews import csrf_token_view, AddJobAPIView, AddressAPIView, BillToView, CompanyView, CustomRegisterView, CustomLoginView, CustomLogoutView, JobsAPIView, UploadLogo, TaxCompanyView
 
 urlpatterns = [
     path('kwam/', admin.site.urls),
+    path('django-sonar/', include('django_sonar.urls')),
     path("accounts/", include("allauth.urls")),
     # path('api/auth/', include('dj_rest_auth.urls')),  # Login/logout
     path('api/auth/login/', CustomLoginView.as_view(), name='custom-login'),
@@ -27,10 +28,13 @@ urlpatterns = [
     path('api/auth/registration/', CustomRegisterView.as_view(), name='custom-register'),
     path('api/add-job/', AddJobAPIView.as_view(), name="add-job"),
     path('api/jobs/<int:user_id>/', JobsAPIView.as_view(), name="jobs"),
+    path('api/jobs/delete/<int:pk>/', JobsAPIView.as_view(), name='jobs'),  # For GET a specific company
     path('api/address/', AddressAPIView.as_view(), name='create-address'),
     path('api/company/', CompanyView.as_view(), name='company_create_get'),  # For POST and GET all companies
     path('api/update-company-tax/', TaxCompanyView.as_view(), name='company_update_tax'),
     path('api/company/<int:company_id>/', CompanyView.as_view(), name='company_detail'),  # For GET a specific company
     path('api/upload-logo/', UploadLogo.as_view(), name='upload-logo'),
+    path('api/billto/', BillToView.as_view(), name='bill-to'),
+    path('api/billto/<int:user_id>/', BillToView.as_view(), name='bill-to'),
     path('api/csrf/', csrf_token_view, name='csrf'),
 ]

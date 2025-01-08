@@ -7,12 +7,13 @@ from dj_rest_auth.views import LoginView, LogoutView
 from dj_rest_auth.registration.views import RegisterView
 
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.exceptions import NotFound
 from rest_framework.parsers import MultiPartParser, FormParser
-from .models import Address, Company, Job
-from .serializers import AddressSerializer, CompanySerializer, CompanyLogoSerializer, JobSerializer, TaxCompanySerializer
+from .models import Address, BillTo, Company, Job
+from .serializers import AddressSerializer, BillToSerializer, CompanySerializer, CompanyLogoSerializer, JobSerializer, TaxCompanySerializer
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -199,6 +200,15 @@ class AddJobAPIView(APIView):
     
 
 class JobsAPIView(APIView):
+   def delete(self, request, pk=None):
+        try:
+            job = Job.objects.get(pk=pk)
+            job.delete()
+            logging.info(f"++++++++++++++++ Job deleted successfully ++++++++++++++++")
+            return Response({"message": "Job deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except Job.DoesNotExist:
+            return Response({"error": "Job not found"}, status=status.HTTP_404_NOT_FOUND) 
+    
    def get(self, request, user_id=None, *args, **kwargs):
       
       try:      
@@ -217,3 +227,36 @@ class JobsAPIView(APIView):
         
    def post(self, request, *args, **kwargs):
       pass
+  
+  
+
+class BillToView(APIView):
+    serializer_class = BillToSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, user_id=None):
+        try:      
+         billto = BillTo.objects.filter(user_id=user_id)
+         
+         serializer = self.serializer_class(billto, many=True)
+         
+         data = {
+            'message': 'LETS GET THE BAG!!!',
+            'myjobs': serializer.data,
+         }
+         
+         return Response(data=data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            logging.error(f'Error: {e}')
+    
+    def post(self, request, user_id=None):
+        user_id = user_id
+        logging.info(f"<----------- WE IN BILL TO {request.user} ---------->")
+        serializer = self.serializer_class(data=request.data)
+        print(serializer.is_valid())
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            logging.error(serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

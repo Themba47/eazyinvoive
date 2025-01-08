@@ -14,7 +14,7 @@ const ReusableModalPicker = ({
   onClose,
   options,
   onSelect,
-  title = "Select an option",
+  title,
 }) => {
   return (
     <Modal
@@ -40,7 +40,7 @@ const ReusableModalPicker = ({
                   onClose();
                 }}
               >
-                <Text style={[styles.optionText]}>{item.label}</Text>
+                <Text style={[styles.optionText]}>{item.label || item.job_name}</Text>
               </TouchableOpacity>
             )}
           />

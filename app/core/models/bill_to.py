@@ -14,10 +14,10 @@ class BillTo(models.Model):
     
     address = models.CharField(max_length=255, blank=True, null=True)
     complex_apartment = models.CharField(max_length=255, blank=True, null=True)
-    city = models.CharField(max_length=100)
+    city = models.CharField(max_length=100, blank=True, null=True)
     province = models.CharField(max_length=100, blank=True, null=True)
     postal_code = models.CharField(max_length=20, blank=True, null=True)
-    country = models.CharField(max_length=100)
+    country = models.CharField(max_length=100, blank=True, null=True)
     latitude = models.DecimalField(max_digits=10, decimal_places=8, blank=True, null=True)
     longitude = models.DecimalField(max_digits=11, decimal_places=8, blank=True, null=True)
     additional_info = models.TextField(blank = True, null=True)

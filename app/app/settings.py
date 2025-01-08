@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'core',
     'myaccount',
     #external
+    'django_sonar',
     'crispy_forms',
     'django_filters',
     'pwa',

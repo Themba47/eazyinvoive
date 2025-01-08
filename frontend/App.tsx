@@ -21,6 +21,7 @@ import AddService from './screens/src/AddService';
 import MyJobsListScreen from './screens/src/MyJobsListScreen';
 import InvoiceSetup from './screens/src/InvoiceSetup';
 import PreviewScreen from './screens/src/PreviewScreen';
+import CreateInvoice from './screens/src/CreateInvoice';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -40,7 +41,7 @@ const TabNavigator = () => (
 
         return <Ionicons name={iconName as string} size={size} color={color} />;
       },
-      tabBarActiveTintColor: '#00EE93',
+      tabBarActiveTintColor: '#1854b5',
       tabBarInactiveTintColor: 'gray',
     })}
   >
@@ -79,8 +80,9 @@ const App: React.FC = () => {
           <Stack.Screen name="AddressForm" component={AddressForm} options={{ headerShown: false }}/>
           <Stack.Screen name="LogoForm" component={LogoUploadScreen} options={{ headerShown: false }}/>
           <Stack.Screen name="TaxToggleScreen" component={TaxToggleScreen} options={{ headerShown: false }} />
-          <Stack.Screen name="AddService" component={AddService} options={{ headerShown: true }} />
+          <Stack.Screen name="CreateInvoice" component={CreateInvoice} options={{ headerShown: true }} />
           <Stack.Screen name="Preview" component={PreviewScreen} options={{ headerShown: true }} />
+          <Stack.Screen name="AddService" component={AddService} options={{ headerShown: true }} />
           {/* Add other screens like Home, etc. */}
         </Stack.Navigator>
       </NavigationContainer>

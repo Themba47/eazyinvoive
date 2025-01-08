@@ -15,6 +15,7 @@ class Job(models.Model):
     ]
 
    user_id = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='User')
+   job_name = models.CharField(max_length = 100, blank=True, null=True, default="", help_text='', unique=True)
    description = models.CharField(max_length = 2500, blank=True, null=True, default=None, help_text='')
    price = models.CharField(max_length = 500, blank=True, null=True, default=None, help_text='', unique=True)
    job_type = models.CharField(max_length=10, choices=JOB_TYPES, default='Service')
@@ -31,7 +32,7 @@ class Job(models.Model):
    
 class JobAdmin(admin.ModelAdmin):
     #list
-	list_display = ['__str__','id','description','Active','price']
+	list_display = ['__str__','id', 'job_name', 'description','Active','price']
 	# search_fields = [
 	# 	'package',
    #    # 'last_login_longer_than_30_days',
