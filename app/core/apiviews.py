@@ -234,10 +234,10 @@ class BillToView(APIView):
     serializer_class = BillToSerializer
     permission_classes = [IsAuthenticated]
     
-    def get(self, user_id=None):
+    def get(self, request, user_id=None):
         try:      
          billto = BillTo.objects.filter(user_id=user_id)
-         
+         logging.info(billto)
          serializer = self.serializer_class(billto, many=True)
          
          data = {

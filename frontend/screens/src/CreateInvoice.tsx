@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Switch, Alert } from "react-native";
+import {FlatList, View, Text, TextInput, TouchableOpacity, StyleSheet, Switch, Alert } from "react-native";
 import axios from "axios";
 import Toast from 'react-native-toast-message';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,6 +15,7 @@ export default({ navigation }) => {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [selectedClient, setSelectedClient] = useState('');
+  const [selectedClientDetail, setSelectedClientDetail] = useState('');
   const [isClientModalVisible, setClientModalVisible] = useState(false);
   const [isJobModalVisible, setJobModalVisible] = useState(false);
   const [billToVisible, setBillToVisible] = useState(false);
@@ -24,23 +25,32 @@ export default({ navigation }) => {
   const [myclients, setMyClients] = useState([]); 
    
    const [jobs, setJobs] = useState([]);
-   const [selectedId, setSelectedId] = useState();
+   const [selectedJob, setSelectedJob] = useState([]);
+
+   const getMyClients = async () => {
+    try {
+      const response = await axios.get(`${backendApp()}/api/billto/${userId}/`)
+      setMyClients(response.data.myjobs);
+    } catch (error) {
+      console.error('Error:', error.message)
+    }
+  };
  
    const getMyJobs = async () => {
      try {
        const response = await axios.get(`${backendApp()}/api/jobs/${userId}/`)
-       console.log(response.data.myjobs)
        setJobs(response.data.myjobs);
      } catch (error) {
        console.error('Error:', error.message)
      }
    };
    useEffect(() => {
+     getMyClients()
      getMyJobs()
    }, [])// Temporary hardcoded list of countries
 
   const [isTaxIncluded, setIsTaxIncluded] = useState(false);
-  const options = ["Service", "Product"];
+  const options = ["QUOTE", "UNPAID", "PAID"];
 
   const toggleSwitch = () => setIsTaxIncluded((prev) => !prev);
 
@@ -78,64 +88,48 @@ export default({ navigation }) => {
     }
   };
 
-  const handleSelect = (client) => {
-		setSelectedClient(client.value);
-		setIsModalVisible(false); // Close the modal after selection
+  const handleSelectClient = (client) => {
+    
+    // Exclude the unwanted fields
+    const filteredClient = { ...client };
+    delete filteredClient.id
+    delete filteredClient.Active;
+    delete filteredClient.longitude;
+    delete filteredClient.latitude;
+    delete filteredClient.created_at;
+    delete filteredClient.updated_at;
+    delete filteredClient.user_id;
+
+    const clientString = Object.entries(filteredClient)
+    .filter(([_, value]) => value !== "" && value !== null) // Exclude empty strings and null values
+    .map(([key, value]) => `${value}`)
+    .join("\n");
+
+    setSelectedClientDetail(clientString);
+		setSelectedClient(filteredClient.client_name);
+		setBillToVisible(false); // Close the modal after selection
 	};
+
+  const handleSelectItem = (item) => {
+		setSelectedJob((prevItems) => {
+      // Check if the item is already in the array
+      const exists = prevItems.some((job) => job.id === item.id);
+      if (!exists) {
+        return [...prevItems, item]; // Add the new item if it doesn't exist
+      }
+      return prevItems; // Return the previous array if the item exists
+    });
+		setJobModalVisible(false); // Close the modal after selection
+	};
+
+  const removeItem = (item) => {
+    setSelectedJob((prevItems) => prevItems.filter((job) => job.id !== item.id));
+  };
 
   return (
     <View style={styles.container}>
-      <View>
-        <Text style={styles.label}>Bill To:</Text>
-        <TouchableOpacity
-          style={styles.input}
-          onPress={() => setClientModalVisible(true)}
-        >
-          <Text style={styles.selectText}>
-            {selectedClient || "Select a client"}
-          </Text>
-        </TouchableOpacity>
-
-        <ReusableModalPicker
-          visible={isClientModalVisible}
-          onClose={() => setClientModalVisible(false)}
-          options={myclients}
-          onSelect={handleSelect}
-          title="Select a client"
-        />
-        <TouchableOpacity style={styles.addButton} onPress={() => setBillToVisible(true)}>
-          <Ionicons name="add-circle" size={30} color="blue" />
-        </TouchableOpacity>
-
-        {selectedClient ? <Text>{selectedClient}</Text> : null}
-      </View>
-
-      <View>
-        <Text style={styles.label}>Add Item:</Text>
-        <TouchableOpacity
-          style={styles.input}
-          onPress={() => setJobModalVisible(true)}
-        >
-          <Text style={styles.selectText}>
-            {selectedClient || "Select an item"}
-          </Text>
-        </TouchableOpacity>
-
-        <ReusableModalPicker
-          visible={isJobModalVisible}
-          onClose={() => setJobModalVisible(false)}
-          options={jobs}
-          onSelect={handleSelect}
-          title="Select an item"
-        />
-        <TouchableOpacity style={styles.addButton} onPress={() => setAddSericeToVisible(true)}>
-          <Ionicons name="add-circle" size={30} color="blue" />
-        </TouchableOpacity>
-
-        {selectedClient ? <Text>{selectedClient}</Text> : null}
-      </View>
-
-      <Text style={styles.label}>Select Job Type:</Text>
+      <View style={styles.createContainer}>
+      <Text style={styles.label}>Select Invoice:</Text>
       <View style={styles.optionsContainer}>
         {options.map((option, index) => (
           <TouchableOpacity
@@ -152,10 +146,73 @@ export default({ navigation }) => {
                 selectedOption === option ? styles.selectedOptionText : null,
               ]}
             >
-              {option}
+              {option.toLocaleLowerCase()}
             </Text>
           </TouchableOpacity>
         ))}
+      </View>
+
+      <View>
+        <Text style={styles.label}>Bill To:</Text>
+        <TouchableOpacity
+          style={styles.input}
+          onPress={() => setClientModalVisible(true)}
+        >
+          <Text style={styles.selectText}>
+            {selectedClient || "Select a client"}
+          </Text>
+        </TouchableOpacity>
+
+        <ReusableModalPicker
+          visible={isClientModalVisible}
+          onClose={() => setClientModalVisible(false)}
+          options={myclients}
+          onSelect={handleSelectClient}
+          title="Select a client"
+        />
+        <TouchableOpacity style={styles.addButton} onPress={() => setBillToVisible(true)}>
+          <Ionicons name="add-circle" size={30} color="blue" />
+        </TouchableOpacity>
+
+        {selectedClient ? <Text>{selectedClientDetail}</Text> : null}
+      </View>
+
+      <View>
+        <Text style={styles.label}>Add Item:</Text>
+        <TouchableOpacity
+          style={styles.input}
+          onPress={() => setJobModalVisible(true)}
+        >
+          <Text style={styles.selectText}>Add An item</Text>
+        </TouchableOpacity>
+
+        <View>
+          <FlatList
+              data={selectedJob}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({ item }) => (
+                <View style={styles.addedItems}>
+                <Text style={[styles.addedItemsText]}>{item.job_name}</Text>
+                <TouchableOpacity style={styles.addedItemsButton} onPress={() => removeItem(item)}>
+                  <Ionicons name="remove-circle" size={30} color="red" />
+                </TouchableOpacity>
+                </View>
+              )}
+            />
+        </View>
+
+        <ReusableModalPicker
+          visible={isJobModalVisible}
+          onClose={() => setJobModalVisible(false)}
+          options={jobs}
+          onSelect={handleSelectItem}
+          title="Select An item"
+        />
+        <TouchableOpacity style={styles.addButton} onPress={() => setAddSericeToVisible(true)}>
+          <Ionicons name="add-circle" size={30} color="blue" />
+        </TouchableOpacity>
+
+        {selectedClient ? <Text>{selectedClient}</Text> : null}
       </View>
 
       <Switch
@@ -173,10 +230,6 @@ export default({ navigation }) => {
           placeholder="Enter notes for invoice"
         />
       <Text>{notes}</Text>
-
-      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-        <Text style={styles.submitButtonText}>Preview Invoice</Text>
-      </TouchableOpacity>
 
       {/* **************** Modals ************* */}
       <BillToModal
@@ -196,7 +249,12 @@ export default({ navigation }) => {
           setAddSericeToVisible(false);
         }}
       />
-
+      </View>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+          <Text style={styles.submitButtonText}>Preview Invoice</Text>
+        </TouchableOpacity>
+        </View>
     </View>
   );
 };
@@ -206,6 +264,12 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: "#fff",
+  },
+  createContainer: {
+    flex: 9
+  },
+  buttonContainer: {
+    flex: 1
   },
   label: {
     fontSize: 16,
@@ -256,7 +320,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
+  addedItems: {
+    flex: 1,
+    borderWidth: 1,
+    padding: 2,
+    borderColor: "#000",
+    borderRadius: 10, 
+    flexDirection: "row",
+    alignItems: "center",
+    margin: 5,
+  },
+  addedItemsText: {
+    flex: 8
+  },
+  addedItemsButton: {
+    flex: 2
+  },
   addButton: {
-    // Add any custom styling if necessary
+    
   },
 });

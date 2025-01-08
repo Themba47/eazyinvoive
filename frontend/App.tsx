@@ -36,7 +36,7 @@ const TabNavigator = () => (
 
         if (route.name === 'Home') iconName = 'home-outline';
         else if (route.name === 'My Jobs') iconName = 'search-outline';
-        else if (route.name === 'Send Invoice') iconName = 'create';
+        else if (route.name === 'Create Invoice') iconName = 'create';
         else if (route.name === 'Profile') iconName = 'person-outline';
 
         return <Ionicons name={iconName as string} size={size} color={color} />;
@@ -47,7 +47,7 @@ const TabNavigator = () => (
   >
     <Tab.Screen name="Home" component={HomeScreen} options={{ headerShown: true }}/>
     <Tab.Screen name="My Jobs" component={MyJobsListScreen} options={{ headerShown: true }} />
-    <Tab.Screen name="Send Invoice" component={InvoiceSetup} options={{ headerShown: true }}/>
+    <Tab.Screen name="Create Invoice" component={CreateInvoice} options={{ headerShown: true }}/>
     <Tab.Screen name="Profile" component={DrawNavigator} options={{ headerShown: false }}/>
   </Tab.Navigator>
 );
@@ -80,7 +80,7 @@ const App: React.FC = () => {
           <Stack.Screen name="AddressForm" component={AddressForm} options={{ headerShown: false }}/>
           <Stack.Screen name="LogoForm" component={LogoUploadScreen} options={{ headerShown: false }}/>
           <Stack.Screen name="TaxToggleScreen" component={TaxToggleScreen} options={{ headerShown: false }} />
-          <Stack.Screen name="CreateInvoice" component={CreateInvoice} options={{ headerShown: true }} />
+          <Stack.Screen name="Create Invoice" component={CreateInvoice} options={{ headerShown: true }} />
           <Stack.Screen name="Preview" component={PreviewScreen} options={{ headerShown: true }} />
           <Stack.Screen name="AddService" component={AddService} options={{ headerShown: true }} />
           {/* Add other screens like Home, etc. */}

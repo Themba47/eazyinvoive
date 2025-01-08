@@ -40,7 +40,7 @@ const ReusableModalPicker = ({
                   onClose();
                 }}
               >
-                <Text style={[styles.optionText]}>{item.label || item.job_name}</Text>
+                <Text style={[styles.optionText]}>{item.label || item.job_name || item.client_name}</Text>
               </TouchableOpacity>
             )}
           />

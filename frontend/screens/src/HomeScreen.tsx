@@ -1,117 +1,177 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
   FlatList,
-  ImageBackground,
+  Text,
+  View,
+  StyleSheet,
   TouchableOpacity,
-  Dimensions,
+  Alert,
 } from 'react-native';
+import axios from 'axios';
 import { AuthContext } from '../auth/AuthContext';
+import { fetchCsrfToken, getCsrfToken } from '../auth/CsrfService';
+import Swipeable from 'react-native-gesture-handler/Swipeable';
+import { Ionicons } from '@expo/vector-icons';
+import SearchComponent from '../components/SearchComponent';
+import { backendApp } from '../utils';
 
-const HomeScreen = ({navigation}) => {
+const Item = ({item, onPress, backgroundColor, textColor}) => (
+  <TouchableOpacity onPress={onPress} style={[styles.item, {backgroundColor}]}>
+    <Text style={[styles.subheading, {color: textColor}]}>{item.job_name}</Text>
+    <Text style={[styles.body, {color: textColor}]}>{item.description}</Text>
+    <Text style={[{color: textColor}]}>R {item.price}</Text>
+  </TouchableOpacity>
+);
+
+export default ({ navigation }) => {
   const { authToken, companyId, userId, logout } = useContext(AuthContext);
-  console.log(`${authToken} Company: ${companyId} User: ${userId}`)
-  const [selectedCard, setSelectedCard] = useState<number | null>(null); // Track selected card
+  const [jobs, setJobs] = useState([]);
+  const [addServiceToVisible, setAddSericeToVisible] = useState(false)
+  const [selectedId, setSelectedId] = useState();
 
-  // Mock data for cards
-  const cards = [
-    { id: 1, text: 'Card 1', image: 'https://via.placeholder.com/150' },
-    { id: 2, text: 'Card 2', image: 'https://via.placeholder.com/150' },
-    { id: 3, text: 'Card 3', image: 'https://via.placeholder.com/150' },
-    { id: 4, text: 'Card 4', image: 'https://via.placeholder.com/150' },
-  ];
+  const getMyJobs = async () => {
+    try {
+      const response = await axios.get(`${backendApp()}/api/jobs/${userId}/`)
+      console.log(response.data.myjobs)
+      setJobs(response.data.myjobs);
+    } catch (error) {
+      console.error('Error:', error.message)
+    }
+  };
+  useEffect(() => {
+		getMyJobs()
+	}, [])
+
+  const deleteMessage = async (id) => {
+    try {
+        // Make a DELETE request to the API to delete the job by its ID
+        await fetchCsrfToken();
+        await axios.delete(`${backendApp()}/api/jobs/delete/${id}/`, 
+        {
+            headers: {
+              'X-CSRFToken': getCsrfToken(),
+            },
+        });
+        
+        // Update the state to remove the deleted job locally
+        setJobs((prev) => prev.filter((job) => job.id !== id));
+        console.log(`Job with ID ${id} deleted successfully`);
+        getMyJobs()
+    } catch (error) {
+        console.error('Error deleting job:', error.response || error.message);
+    }
+};
+
+
+  const renderRightActions = (id) => (
+    <View style={styles.actionsContainer}>
+      <TouchableOpacity
+        style={[styles.actionButton, { backgroundColor: 'red' }]}
+        onPress={() => deleteMessage(id)}
+      >
+        <Text style={styles.actionText}>Delete</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.actionButton, { backgroundColor: 'gray' }]}
+        onPress={() => Alert.alert('Feature', 'More options coming soon!')}
+      >
+        <Text style={styles.actionText}>More</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  const renderItem = ({ item }) => { 
+    const backgroundColor = item.id === selectedId ? '#6e3b6e' : 'transparent';
+    const color = item.id === selectedId ? 'white' : 'black';
+
+    return(
+    <Swipeable renderRightActions={() => renderRightActions(item.id)}>
+      <TouchableOpacity style={styles.card}>
+      <Item
+        item={item}
+        onPress={() => setSelectedId(item.id)}
+        backgroundColor={backgroundColor}
+        textColor={color}
+      />
+      </TouchableOpacity>
+    </Swipeable>
+  )};
 
   return (
     <View style={styles.container}>
-      {/* First Row: Current Points */}
-      <View style={styles.row20}>
-        <Text style={styles.pointsText}>Current Points: 1200</Text>
+      <View style={styles.div1}>
+        <SearchComponent
+          data={jobs} 
+          placeholder="Search"
+          populateFunc={setJobs}
+        />
       </View>
-
-      <Text onPress={() => navigation.navigate('InvoiceSetup')}>
-            View My Jobs
-      </Text>
-
-      {/* Second Row: Scrollable Cards */}
-      <View style={styles.row80}>
+      <View style={styles.div2}>
         <FlatList
-          data={cards}
-          keyExtractor={(item) => item.id.toString()}
-          showsHorizontalScrollIndicator={false}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={[
-                styles.card,
-                selectedCard === item.id && styles.selectedCard,
-              ]}
-              onPress={() => setSelectedCard(item.id)} // Set selected card
-            >
-              <ImageBackground
-                source={{ uri: item.image }}
-                style={styles.cardBackground}
-                imageStyle={styles.cardImage}
-              >
-                <Text style={styles.cardText}>{item.text}</Text>
-              </ImageBackground>
-            </TouchableOpacity>
-          )}
+          data={jobs} 
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          extraData={selectedId}
+          contentContainerStyle={{ paddingBottom: 20 }}
         />
       </View>
     </View>
   );
 };
 
-const screen_width = Dimensions.get('window').width
-const screen_height = Dimensions.get('window').height
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-  },
-  row20: {
-    flex: 2, // 30% height
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f7f7f7',
-  },
-  pointsText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  row80: {
-    flex: 8, // 70% height
-    margin: 10,
-    paddingVertical: 10,
+    backgroundColor: '#f5f5f5',
+    paddingTop: 20,
   },
   card: {
-    width: screen_width,
-    height: '90%',
-    borderRadius: 10,
-    overflow: 'hidden',
-  },
-  selectedCard: {
-    borderWidth: 2,
-    borderColor: '#007BFF',
-  },
-  cardBackground: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  cardImage: {
-    resizeMode: 'cover',
+    backgroundColor: '#f0f4fc',
+    marginVertical: 4,
+    marginHorizontal: 16,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   cardText: {
-    fontSize: 18,
-    color: '#fff',
-    fontWeight: 'bold',
-    textAlign: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Text background for contrast
-    padding: 5,
+    fontSize: 16,
+    color: '#333',
   },
+  actionsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  actionButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 80,
+    height: '100%',
+  },
+  actionText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  item: {
+    padding: 10,
+    marginVertical: 8,
+    marginHorizontal: 8,
+  },
+  subheading: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  body: {
+    fontSize: 16,
+  },
+  title: {
+    fontSize: 32,
+  },
+  div1: {
+    flex: 1
+  },
+  div2: {
+    flex: 9
+  }
 });
-
-export default HomeScreen;
-
