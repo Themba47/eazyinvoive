@@ -7,6 +7,7 @@ import * as FileSystem from 'expo-file-system';
 import * as MediaLibrary from 'expo-media-library';
 import { Buffer } from 'buffer';
 import { backendApp, getPaperSize } from '../utils';
+import { generateInvoicePdf } from '../pdfs/makepdfs';
 
 // Ensure Buffer is globally available
 global.Buffer = global.Buffer || Buffer;
@@ -14,50 +15,16 @@ global.Buffer = global.Buffer || Buffer;
 export default ({ route, navigation }) => {
   const [pdfPath, setPdfPath] = useState('');
   const { data } = route.params;
-  console.log(data)
 
+  const getMyInfo = () => {
+    console.log(data)
+  }
+  
   useEffect(() => {
-	const generatePDF = async () => {
-	  try {
-		 // Create a new PDF document
-		 const pdfDoc = await PDFDocument.create();
-		 const papersize = getPaperSize('A4')
-		 const page = pdfDoc.addPage(papersize);
-
-		//  page.drawRectangle({
-		// 	x: 0,
-		// 	y: 0,
-		// 	width: papersize[0],
-		// 	height: papersize[1],
-		// 	color: rgb(0.2, 0.3, 1), // RGB values for light blue
-		//  });
-
-		 // Add text to the PDF
-		 const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-		 page.drawText(`Name: ${data.name}`, { x: 50, y: papersize[1] * .85, size: 16, font, color: rgb(0, 0, 0.8) });
-		 page.drawText(`Details: ${data.details}`, { x: 50, y: papersize[1] * .8, size: 12, font, color: rgb(0, 0, 0.6) });
-
-		 // Serialize the PDF to bytes
-		 const pdfBytes = await pdfDoc.save();
-
-		 // Convert bytes to base64
-		 const pdfBase64 = Buffer.from(pdfBytes).toString('base64');
-
-		 // Save the PDF file using expo-file-system
-		 const filePath = `${FileSystem.documentDirectory}example.pdf`;
-		 await FileSystem.writeAsStringAsync(filePath, pdfBase64, {
-			encoding: FileSystem.EncodingType.Base64,
-		 });
-
-		 // Set the path for the generated PDF
-		 setPdfPath(filePath);
-		 console.log(filePath)
-	  } catch (error) {
-		 console.error('Error generating PDF:', error);
-	  }
-	};
-
-	generatePDF();
+    if(data) {
+    getMyInfo()
+	  generateInvoicePdf(setPdfPath, data)
+	}
  }, [data]);
 
   const requestStoragePermission = async () => {
@@ -86,22 +53,32 @@ export default ({ route, navigation }) => {
 	  if (!pdfPath) {
 		 Alert.alert('Error', 'PDF file is not generated yet.');
 		 return;
-	  }
- 
+	  } else {
+      console.log('File exists');
+    }
+    
+    console.log("TIME 91 MINUTE>>>>")
 	  // Define the destination path
-	  const downloadPath = `${FileSystem.documentDirectory}example.pdf`;
+    const timestamp = new Date().getTime();
+	  const downloadPath = `${FileSystem.cacheDirectory}example_${timestamp}.pdf`;
  
 	  // Copy the file to the destination
 	  await FileSystem.copyAsync({
-		 from: pdfPath,
-		 to: downloadPath,
+      from: pdfPath,
+      to: downloadPath,
 	  });
- 
+    
+    await Sharing.shareAsync(downloadPath, {
+      mimeType: 'application/pdf',
+      dialogTitle: 'Save PDF',
+      UTI: 'com.adobe.pdf' // for iOS
+    });
+
 	  // Save the file to the device's media library
-	  const asset = await MediaLibrary.createAssetAsync(downloadPath);
-	  await MediaLibrary.createAlbumAsync('Download', asset, false);
+	  // const asset = await MediaLibrary.createAssetAsync(downloadPath);
+	  // await MediaLibrary.createAlbumAsync('Download', asset, false);
  
-	  Alert.alert('Success', `PDF saved successfully!`);
+	  // Alert.alert('Success', `PDF saved successfully!`);
 	} catch (error) {
 	  console.error('Error saving PDF:', error);
 	  Alert.alert('Error', 'An error occurred while saving the PDF.');
@@ -132,8 +109,8 @@ export default ({ route, navigation }) => {
       <View style={styles.buttonContainer}>
         <Button title="Back" onPress={() => navigation.goBack()} />
         <Button title="Save Locally" onPress={handleSave} />
-        <Button title="Send via WhatsApp" onPress={() => handleShare('whatsapp')} />
-        <Button title="Send via Email" onPress={() => handleShare('email')} />
+        <Button title="Send via WhatsApp" onPress={() => handleShare(pdfPath)} />
+        <Button title="Send via Email" onPress={() => handleShare(pdfPath)} />
       </View>
     </View>
   );
