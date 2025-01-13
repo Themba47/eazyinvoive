@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, View, StyleSheet, Alert, Platform, Dimensions, PermissionsAndroid } from 'react-native';
+import { Text, View, StyleSheet, Alert, Platform, Dimensions, PermissionsAndroid, TouchableOpacity } from 'react-native';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import { WebView } from 'react-native-webview';
 import * as Sharing from 'expo-sharing';
@@ -57,7 +57,6 @@ export default ({ route, navigation }) => {
       console.log('File exists');
     }
     
-    console.log("TIME 91 MINUTE>>>>")
 	  // Define the destination path
     const timestamp = new Date().getTime();
 	  const downloadPath = `${FileSystem.cacheDirectory}example_${timestamp}.pdf`;
@@ -107,10 +106,15 @@ export default ({ route, navigation }) => {
         />
       ) : null}
       <View style={styles.buttonContainer}>
-        <Button title="Back" onPress={() => navigation.goBack()} />
-        <Button title="Save Locally" onPress={handleSave} />
-        <Button title="Send via WhatsApp" onPress={() => handleShare(pdfPath)} />
-        <Button title="Send via Email" onPress={() => handleShare(pdfPath)} />
+        <TouchableOpacity onPress={handleSave}>
+          <Text>Save Locally</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handleShare(pdfPath)}>
+          <Text>Send via Whatsapp</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handleShare(pdfPath)}>
+          <Text>Send via Email</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );

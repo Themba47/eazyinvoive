@@ -17,9 +17,13 @@ import { backendApp } from '../utils';
 
 const Item = ({item, onPress, backgroundColor, textColor}) => (
   <TouchableOpacity onPress={onPress} style={[styles.item, {backgroundColor}]}>
-    <Text style={[styles.subheading, {color: textColor}]}>{item.job_name}</Text>
-    <Text style={[styles.body, {color: textColor}]}>{item.description}</Text>
-    <Text style={[{color: textColor}]}>R {item.price}</Text>
+    <Text style={[styles.subheading, {color: textColor}]}>{item.name}</Text>
+    {item.client && (
+      <Text style={[styles.body, {color: textColor}]}>Invoice to: {item.client.client_company_name}</Text>
+    )}
+    <Text style={[styles.body, {color: textColor}]}>created: {item.date_created.split("T")[0]}</Text>
+    <Text style={[{color: textColor}]}>R {item.total}</Text>
+    <Text style={[styles.body, {color: textColor}]}>{item.status}</Text>
   </TouchableOpacity>
 );
 
@@ -31,8 +35,8 @@ export default ({ navigation }) => {
 
   const getMyJobs = async () => {
     try {
-      const response = await axios.get(`${backendApp()}/api/jobs/${userId}/`)
-      console.log(response.data.myjobs)
+      const response = await axios.get(`${backendApp()}/api/invoices/`)
+      // console.log(response.data.myjobs)
       setJobs(response.data.myjobs);
     } catch (error) {
       console.error('Error:', error.message)
@@ -46,7 +50,7 @@ export default ({ navigation }) => {
     try {
         // Make a DELETE request to the API to delete the job by its ID
         await fetchCsrfToken();
-        await axios.delete(`${backendApp()}/api/jobs/delete/${id}/`, 
+        await axios.delete(`${backendApp()}/api/invoices/${id}/`, 
         {
             headers: {
               'X-CSRFToken': getCsrfToken(),
@@ -54,7 +58,7 @@ export default ({ navigation }) => {
         });
         
         // Update the state to remove the deleted job locally
-        setJobs((prev) => prev.filter((job) => job.id !== id));
+        setJobs((prev) => prev.filter((invoice) => invoice.id !== id));
         console.log(`Job with ID ${id} deleted successfully`);
         getMyJobs()
     } catch (error) {
@@ -81,6 +85,9 @@ export default ({ navigation }) => {
   );
 
   const renderItem = ({ item }) => { 
+    if(item.client != null) {
+      console.log(item.client.client_company_name)
+    }
     const backgroundColor = item.id === selectedId ? '#6e3b6e' : 'transparent';
     const color = item.id === selectedId ? 'white' : 'black';
 

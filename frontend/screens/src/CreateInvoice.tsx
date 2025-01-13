@@ -1,8 +1,10 @@
 import React, { useContext, useEffect, useState } from "react";
-import {FlatList, View, Text, TextInput, TouchableOpacity, StyleSheet, Switch, Alert } from "react-native";
+import {FlatList, View, Text, TextInput, TouchableOpacity, StyleSheet, Switch, Alert, ScrollView, Platform } from "react-native";
 import axios from "axios";
 import Toast from 'react-native-toast-message';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
+import { format } from 'date-fns';
 import { fetchCsrfToken, getCsrfToken } from '../auth/CsrfService';
 import BillToModal from "../components/BillToModal";
 import ReusableModalPicker from '../components/OptionsScreen';
@@ -15,6 +17,7 @@ export default({ navigation }) => {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [selectedClient, setSelectedClient] = useState('');
+  const [clientId, setClientId] = useState('')
   const [selectedClientDetail, setSelectedClientDetail] = useState('');
   const [isClientModalVisible, setClientModalVisible] = useState(false);
   const [isJobModalVisible, setJobModalVisible] = useState(false);
@@ -23,6 +26,13 @@ export default({ navigation }) => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [notes, setNotes] = useState("")
   const [myclients, setMyClients] = useState([]); 
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [date, setDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState('');
+
+  const [total, setTotal] = useState(0)
+  const [subtotal, setSubTotal] = useState(0)
+  const [taxpercentage, setTaxPaercentage] = useState(.15)
    
    const [jobs, setJobs] = useState([]);
    const [selectedJob, setSelectedJob] = useState([]);
@@ -45,31 +55,52 @@ export default({ navigation }) => {
      }
    };
    useEffect(() => {
+     setCurrentDate(format(new Date(), 'dd MMM yyyy'));
      getMyClients()
      getMyJobs()
    }, [])// Temporary hardcoded list of countries
 
+  const [dueDate, setDueDate] = useState(false)
   const [isTaxIncluded, setIsTaxIncluded] = useState(false);
   const options = ["QUOTE", "UNPAID", "PAID"];
 
-  const toggleSwitch = () => setIsTaxIncluded((prev) => !prev);
-
-  const handleSubmit = async () => {
-	 await fetchCsrfToken();
-    if (!description || !price || selectedOption === null) {
-      Alert.alert("Error", "Please fill out all fields.");
-      return;
+  const calculateSubtotal = (bool: boolean) => {
+    if(bool && total > 0) {
+      setSubTotal(total - (total * taxpercentage))
+    }else {
+      setSubTotal(0)
     }
+  }
+
+  const toggleSwitch = () => {
+    setIsTaxIncluded(prev => {
+      const newValue = !prev;
+      console.log(newValue);
+      calculateSubtotal(newValue);
+      return newValue;
+    });
+  };
+  const showDueDateView = () => {setDueDate((prev) => !prev)};
+
+  const handleSubmit = async (form) => {
+	 await fetchCsrfToken();
+    // if (!description || !price || selectedOption === null) {
+    //   Alert.alert("Error", "Please fill out all fields.");
+    //   return;
+    // }
 
     const formData = {
-		user_id: userId,
-      description,
-      price,
-      job_type: selectedOption,
+      user: form.userId,
+      name: '',
+      total: form.total,
+      client: form.clientId,
+      items: form.selectedJob,
+      status: form.selectedOption
     };
+    
 
     try {
-      const response = await axios.post(`${backendApp()}/api/add-job/`, formData, 
+      const response = await axios.post(`${backendApp()}/api/invoices/`, formData, 
 		{
 			  headers: {
 					'X-CSRFToken': getCsrfToken(),
@@ -79,14 +110,42 @@ export default({ navigation }) => {
       Toast.show({
 					type: 'success',
 					text1: 'Success',
-					text2: 'Lets Go',
+					text2: 'Template created',
 				 });
-		navigation.navigate('Home');
     } catch (error) {
       console.error(error);
       Alert.alert("Error", `Failed to submit the form because. ${error}`);
     }
   };
+
+  const handlePreview = () => {
+    const formData = {
+      userId: userId,
+      description: description,
+      price: price,
+      clientId: clientId,
+      selectedClientDetail: selectedClientDetail,
+      isClientModalVisible: isClientModalVisible,
+      isJobModalVisible: isJobModalVisible,
+      billToVisible: billToVisible,
+      addServiceToVisible: addServiceToVisible,
+      selectedOption: selectedOption,
+      notes: notes,
+      myclients: myclients,
+      showDatePicker: showDatePicker,
+      dudate: date.toISOString(),
+      currentDate: currentDate,
+      jobs: jobs,
+      selectedJob: selectedJob,
+      isDueDate: dueDate,
+      isTaxIncluded: isTaxIncluded,
+      total: total,
+      subtotal: subtotal,
+      taxpercentage: taxpercentage * 100
+     };
+     handleSubmit(formData)
+     navigation.navigate('Preview', {data: formData});
+  }
 
   const handleSelectClient = (client) => {
     
@@ -107,6 +166,7 @@ export default({ navigation }) => {
 
     setSelectedClientDetail(clientString);
 		setSelectedClient(filteredClient.client_name);
+    setClientId(client.id)
 		setBillToVisible(false); // Close the modal after selection
 	};
 
@@ -115,20 +175,39 @@ export default({ navigation }) => {
       // Check if the item is already in the array
       const exists = prevItems.some((job) => job.id === item.id);
       if (!exists) {
+        setTotal(total + parseFloat(item.price))
         return [...prevItems, item]; // Add the new item if it doesn't exist
       }
       return prevItems; // Return the previous array if the item exists
     });
 		setJobModalVisible(false); // Close the modal after selection
+    calculateSubtotal(isTaxIncluded)
 	};
 
   const removeItem = (item) => {
     setSelectedJob((prevItems) => prevItems.filter((job) => job.id !== item.id));
+    setTotal(total - parseFloat(item.price))
+  };
+
+  const handleDateChange = (event, selectedDate) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setDate(selectedDate);
+    }
+  };
+
+  const formatDate = (date) => {
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    }); // Example: "09 Jan 2025"
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.createContainer}>
+      <ScrollView style={styles.createContainer}>
+      <Text>Today's date: {currentDate}</Text>
       <Text style={styles.label}>Select Invoice:</Text>
       <View style={styles.optionsContainer}>
         {options.map((option, index) => (
@@ -188,11 +267,12 @@ export default({ navigation }) => {
 
         <View>
           <FlatList
+              nestedScrollEnabled={true}
               data={selectedJob}
               keyExtractor={(item, index) => index.toString()}
               renderItem={({ item }) => (
                 <View style={styles.addedItems}>
-                <Text style={[styles.addedItemsText]}>{item.job_name}</Text>
+                <Text style={[styles.addedItemsText]}>{item.job_name} {item.price}</Text>
                 <TouchableOpacity style={styles.addedItemsButton} onPress={() => removeItem(item)}>
                   <Ionicons name="remove-circle" size={30} color="red" />
                 </TouchableOpacity>
@@ -214,13 +294,24 @@ export default({ navigation }) => {
 
         {selectedClient ? <Text>{selectedClient}</Text> : null}
       </View>
+      
+      <View style={styles.switchView}>
+        <Switch
+          value={isTaxIncluded}
+          onValueChange={toggleSwitch}
+          trackColor={{ false: '#767577', true: '#81b0ff' }}
+          thumbColor={isTaxIncluded ? '#f5dd4b' : '#f4f3f4'}
+        />
+        <Text>Show tax and subtotal</Text>
+      </View>
 
-      <Switch
-        value={isTaxIncluded}
-        onValueChange={toggleSwitch}
-        trackColor={{ false: '#767577', true: '#81b0ff' }}
-        thumbColor={isTaxIncluded ? '#f5dd4b' : '#f4f3f4'}
-      />
+      { isTaxIncluded && (
+      <View>
+        <Text style={styles.total}>Subtotal: R {subtotal}</Text>
+        <Text style={styles.total}>Tax R 15%</Text>
+      </View>
+      )}
+      <Text style={styles.total}>Total: R {total}</Text>
 
       <Text style={styles.label}>Notes:</Text>
         <TextInput
@@ -230,6 +321,36 @@ export default({ navigation }) => {
           placeholder="Enter notes for invoice"
         />
       <Text>{notes}</Text>
+      
+      <View style={styles.switchView}>
+        <Switch
+          value={dueDate}
+          onValueChange={showDueDateView}
+          trackColor={{ false: '#767577', true: '#81b0ff' }}
+          thumbColor={dueDate ? '#f5dd4b' : '#f4f3f4'}
+        />
+        <Text>Show due date</Text>
+      </View>
+      { dueDate && (
+      <View>
+        <TouchableOpacity onPress={() => setShowDatePicker((prev) => !prev)} style={{
+          borderWidth: 1,
+          borderColor: '#ccc',
+          padding: 10,
+          borderRadius: 5,
+        }}>
+          <Text>{formatDate(date)}</Text>
+        </TouchableOpacity>
+    
+        {showDatePicker && (
+        <DateTimePicker
+          value={date}
+          mode="date"
+          display={Platform.OS === 'ios' ? 'spinner' : 'calendar'}
+          onChange={handleDateChange}
+        />
+      )}
+      </View>)}
 
       {/* **************** Modals ************* */}
       <BillToModal
@@ -249,9 +370,9 @@ export default({ navigation }) => {
           setAddSericeToVisible(false);
         }}
       />
-      </View>
+      </ScrollView>
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+        <TouchableOpacity style={styles.submitButton} onPress={handlePreview}>
           <Text style={styles.submitButtonText}>Preview Invoice</Text>
         </TouchableOpacity>
         </View>
@@ -265,12 +386,7 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#fff",
   },
-  createContainer: {
-    flex: 9
-  },
-  buttonContainer: {
-    flex: 1
-  },
+  
   label: {
     fontSize: 16,
     marginBottom: 8,
@@ -333,8 +449,16 @@ const styles = StyleSheet.create({
   addedItemsText: {
     flex: 8
   },
+  total: {
+    paddingVertical: 10,
+    fontSize: 24,
+  },
   addedItemsButton: {
     flex: 2
+  },
+  switchView: {
+    flexDirection: 'row',
+    alignItems: 'center'
   },
   addButton: {
     

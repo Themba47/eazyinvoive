@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Address, BillTo, Company, Job
+from .models import Address, BillTo, Company, Job, InvoiceTemplate, GeneratedInvoice
 
 
 class AddressSerializer(serializers.ModelSerializer):
@@ -62,3 +62,20 @@ class BillToSerializer(serializers.ModelSerializer):
         model = BillTo
         fields = '__all__'
         read_only_fields = ('created_at', 'updated_at')
+        
+        
+class GeneratedInvoiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GeneratedInvoice
+        fields = '__all__'
+        read_only_fields = ('created_at')
+        
+
+class InvoiceTemplateSerializer(serializers.ModelSerializer):
+   client = BillToSerializer()
+   class Meta:
+       model = InvoiceTemplate
+       fields = ['id', 'user', 'name', 'client', 'items', 'status', 
+                'Active', 'date_updated', 'date_created']
+       read_only_fields = ['Active', 'date_updated', 'date_created']      
+

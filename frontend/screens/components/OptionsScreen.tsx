@@ -30,6 +30,7 @@ const ReusableModalPicker = ({
 				<Button title="X" onPress={() => {onClose();}} />
 			</Text>
           <FlatList
+            nestedScrollEnabled={true}
             data={options}
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item }) => (

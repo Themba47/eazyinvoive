@@ -12,8 +12,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.exceptions import NotFound
 from rest_framework.parsers import MultiPartParser, FormParser
-from .models import Address, BillTo, Company, Job
-from .serializers import AddressSerializer, BillToSerializer, CompanySerializer, CompanyLogoSerializer, JobSerializer, TaxCompanySerializer
+from .models import Address, BillTo, Company, Job, InvoiceTemplate
+from .serializers import AddressSerializer, BillToSerializer, CompanySerializer, CompanyLogoSerializer, JobSerializer, InvoiceTemplate, GeneratedInvoiceSerializer, InvoiceTemplateSerializer, TaxCompanySerializer
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -260,3 +260,36 @@ class BillToView(APIView):
         else:
             logging.error(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+class InvoiceTemplateView(APIView):
+   def get(self, request):
+       invoices = InvoiceTemplate.objects.filter(user=request.user)
+       serializer = InvoiceTemplateSerializer(invoices, many=True)
+       data = {
+            'message': 'LETS GET THE BAG!!!',
+            'myjobs': serializer.data,
+         }
+       return Response(data)
+
+   def post(self, request):
+       serializer = InvoiceTemplateSerializer(data=request.data)
+       if serializer.is_valid():
+           serializer.save(user=request.user)
+           if request.data.get('status') != 'QUOTE':
+               print(serializer.data['id'])
+            #    print(serializer.data.status)
+            #    GeneratedInvoiceSerializer()
+           return Response(serializer.data, status=201)
+       return Response(serializer.errors, status=400)
+   
+   
+   def delete(self, request, pk=None):
+        try:
+            invoice_template = InvoiceTemplate.objects.get(pk=pk)
+            invoice_template.Active = False
+            invoice_template.save()
+            logging.info(f"++++++++++++++++ Invoice deleted successfully ++++++++++++++++")
+            return Response({"message": "Invoice deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except Job.DoesNotExist:
+            return Response({"error": "Invoice not found"}, status=status.HTTP_404_NOT_FOUND) 
