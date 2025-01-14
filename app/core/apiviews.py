@@ -263,9 +263,13 @@ class BillToView(APIView):
     
     
 class InvoiceTemplateView(APIView):
-   def get(self, request):
-       invoices = InvoiceTemplate.objects.filter(user=request.user)
-       serializer = InvoiceTemplateSerializer(invoices, many=True)
+   def get(self, request, invoiceId=None):
+       if invoiceId:
+           invoice = InvoiceTemplate.objects.filter(user=request.user, pk=invoiceId)
+           serializer = InvoiceTemplateSerializer(invoice , many=True)
+       else:
+            invoices = InvoiceTemplate.objects.filter(user=request.user)
+            serializer = InvoiceTemplateSerializer(invoices, many=True)
        data = {
             'message': 'LETS GET THE BAG!!!',
             'myjobs': serializer.data,

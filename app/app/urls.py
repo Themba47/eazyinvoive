@@ -37,6 +37,6 @@ urlpatterns = [
     path('api/billto/', BillToView.as_view(), name='bill-to'),
     path('api/billto/<int:user_id>/', BillToView.as_view(), name='bill-to'),
     path('api/invoices/', InvoiceTemplateView.as_view(), name='invoice-templates'),
-    path('api/invoices/<int:pk>/', InvoiceTemplateView.as_view(), name='invoice-templates'),
+    path('api/invoices/<int:invoiceId>/', InvoiceTemplateView.as_view(), name='invoice-templates'),
     path('api/csrf/', csrf_token_view, name='csrf'),
 ]

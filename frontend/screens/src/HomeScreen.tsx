@@ -17,9 +17,8 @@ import { backendApp } from '../utils';
 
 const Item = ({item, onPress, backgroundColor, textColor}) => (
   <TouchableOpacity onPress={onPress} style={[styles.item, {backgroundColor}]}>
-    <Text style={[styles.subheading, {color: textColor}]}>{item.name}</Text>
     {item.client && (
-      <Text style={[styles.body, {color: textColor}]}>Invoice to: {item.client.client_company_name}</Text>
+      <Text style={[styles.subheading, {color: textColor}]}>Invoice to: {item.client.client_company_name}</Text>
     )}
     <Text style={[styles.body, {color: textColor}]}>created: {item.date_created.split("T")[0]}</Text>
     <Text style={[{color: textColor}]}>R {item.total}</Text>
@@ -85,9 +84,9 @@ export default ({ navigation }) => {
   );
 
   const renderItem = ({ item }) => { 
-    if(item.client != null) {
-      console.log(item.client.client_company_name)
-    }
+    // if(item.client != null) {
+    //   console.log(item.client.client_company_name)
+    // }
     const backgroundColor = item.id === selectedId ? '#6e3b6e' : 'transparent';
     const color = item.id === selectedId ? 'white' : 'black';
 
@@ -96,7 +95,7 @@ export default ({ navigation }) => {
       <TouchableOpacity style={styles.card}>
       <Item
         item={item}
-        onPress={() => setSelectedId(item.id)}
+        onPress={() => navigation.navigate("ViewInvoice", {invoiceId: (item.id)})}
         backgroundColor={backgroundColor}
         textColor={color}
       />
@@ -166,7 +165,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
   },
   subheading: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
   },
   body: {

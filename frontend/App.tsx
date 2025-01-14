@@ -22,6 +22,7 @@ import MyJobsListScreen from './screens/src/MyJobsListScreen';
 import InvoiceSetup from './screens/src/InvoiceSetup';
 import PreviewScreen from './screens/src/PreviewScreen';
 import CreateInvoice from './screens/src/CreateInvoice';
+import ViewInvoice from './screens/src/ViewInvoice';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -83,6 +84,7 @@ const App: React.FC = () => {
           <Stack.Screen name="Create Invoice" component={CreateInvoice} options={{ headerShown: true }} />
           <Stack.Screen name="Preview" component={PreviewScreen} options={{ headerShown: true }} />
           <Stack.Screen name="AddService" component={AddService} options={{ headerShown: true }} />
+          <Stack.Screen name="ViewInvoice" component={ViewInvoice} options={{ headerShown: true }} />
           {/* Add other screens like Home, etc. */}
         </Stack.Navigator>
       </NavigationContainer>

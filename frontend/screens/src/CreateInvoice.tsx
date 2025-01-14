@@ -95,7 +95,8 @@ export default({ navigation }) => {
       total: form.total,
       client: form.clientId,
       items: form.selectedJob,
-      status: form.selectedOption
+      status: form.selectedOption,
+      file: ''
     };
     
 
