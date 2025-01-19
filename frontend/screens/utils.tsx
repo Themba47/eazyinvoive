@@ -94,3 +94,257 @@ export function industryType() {
 	 ];	 
 }
 
+class ImageProcessor {
+	private imageData: Uint8Array;
+	private width: number;
+	private height: number;
+	private grayscaleData: Uint8Array;
+	private gradientMagnitude: number[];
+	private gradientDirection: number[];
+ 
+	constructor(imageData: Uint8Array, width: number, height: number) {
+	  this.imageData = imageData;
+	  this.width = width;
+	  this.height = height;
+	  this.grayscaleData = new Uint8Array(width * height);
+	  this.gradientMagnitude = new Array(width * height);
+	  this.gradientDirection = new Array(width * height);
+	}
+ 
+	toGrayscale(): void {
+	  for (let i = 0; i < this.height; i++) {
+		 for (let j = 0; j < this.width; j++) {
+			const idx = (i * this.width + j) * 4;
+			const r = this.imageData[idx];
+			const g = this.imageData[idx + 1];
+			const b = this.imageData[idx + 2];
+			this.grayscaleData[i * this.width + j] = 
+			  Math.round(0.299 * r + 0.587 * g + 0.114 * b);
+		 }
+	  }
+	}
+ 
+	gaussianBlur(sigma: number = 1.4): void {
+	  const kernelSize = Math.ceil(sigma * 3) * 2 + 1;
+	  const kernel = this.generateGaussianKernel(kernelSize, sigma);
+	  const tempData = new Uint8Array(this.width * this.height);
+ 
+	  // Horizontal pass
+	  for (let i = 0; i < this.height; i++) {
+		 for (let j = 0; j < this.width; j++) {
+			let sum = 0;
+			let weightSum = 0;
+			
+			for (let k = -Math.floor(kernelSize/2); k <= Math.floor(kernelSize/2); k++) {
+			  if (j + k >= 0 && j + k < this.width) {
+				 const weight = kernel[k + Math.floor(kernelSize/2)];
+				 sum += this.grayscaleData[i * this.width + (j + k)] * weight;
+				 weightSum += weight;
+			  }
+			}
+			
+			tempData[i * this.width + j] = Math.round(sum / weightSum);
+		 }
+	  }
+ 
+	  // Vertical pass
+	  for (let i = 0; i < this.height; i++) {
+		 for (let j = 0; j < this.width; j++) {
+			let sum = 0;
+			let weightSum = 0;
+			
+			for (let k = -Math.floor(kernelSize/2); k <= Math.floor(kernelSize/2); k++) {
+			  if (i + k >= 0 && i + k < this.height) {
+				 const weight = kernel[k + Math.floor(kernelSize/2)];
+				 sum += tempData[(i + k) * this.width + j] * weight;
+				 weightSum += weight;
+			  }
+			}
+			
+			this.grayscaleData[i * this.width + j] = Math.round(sum / weightSum);
+		 }
+	  }
+	}
+ 
+	private generateGaussianKernel(size: number, sigma: number): number[] {
+	  const kernel = new Array(size);
+	  const center = Math.floor(size/2);
+	  
+	  for (let i = 0; i < size; i++) {
+		 const x = i - center;
+		 kernel[i] = Math.exp(-(x * x) / (2 * sigma * sigma));
+	  }
+	  
+	  return kernel;
+	}
+ 
+	computeGradients(): void {
+	  const sobelX = [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]];
+	  const sobelY = [[-1, -2, -1], [0, 0, 0], [1, 2, 1]];
+ 
+	  for (let i = 1; i < this.height - 1; i++) {
+		 for (let j = 1; j < this.width - 1; j++) {
+			let gx = 0;
+			let gy = 0;
+ 
+			for (let ki = -1; ki <= 1; ki++) {
+			  for (let kj = -1; kj <= 1; kj++) {
+				 const val = this.grayscaleData[(i + ki) * this.width + (j + kj)];
+				 gx += val * sobelX[ki + 1][kj + 1];
+				 gy += val * sobelY[ki + 1][kj + 1];
+			  }
+			}
+ 
+			const idx = i * this.width + j;
+			this.gradientMagnitude[idx] = Math.sqrt(gx * gx + gy * gy);
+			this.gradientDirection[idx] = Math.atan2(gy, gx);
+		 }
+	  }
+	}
+ 
+	nonMaximumSuppression(): number[] {
+	  const result = new Array(this.width * this.height).fill(0);
+ 
+	  for (let i = 1; i < this.height - 1; i++) {
+		 for (let j = 1; j < this.width - 1; j++) {
+			const idx = i * this.width + j;
+			const angle = this.gradientDirection[idx] * 180 / Math.PI;
+			const magnitude = this.gradientMagnitude[idx];
+ 
+			const roundedAngle = Math.round(angle / 45) * 45;
+			let neighbor1: number, neighbor2: number;
+ 
+			switch (((roundedAngle + 360) % 360)) {
+			  case 0:
+				 neighbor1 = this.gradientMagnitude[idx - 1];
+				 neighbor2 = this.gradientMagnitude[idx + 1];
+				 break;
+			  case 45:
+				 neighbor1 = this.gradientMagnitude[(i - 1) * this.width + (j + 1)];
+				 neighbor2 = this.gradientMagnitude[(i + 1) * this.width + (j - 1)];
+				 break;
+			  case 90:
+				 neighbor1 = this.gradientMagnitude[(i - 1) * this.width + j];
+				 neighbor2 = this.gradientMagnitude[(i + 1) * this.width + j];
+				 break;
+			  case 135:
+				 neighbor1 = this.gradientMagnitude[(i - 1) * this.width + (j - 1)];
+				 neighbor2 = this.gradientMagnitude[(i + 1) * this.width + (j + 1)];
+				 break;
+			  default:
+				 neighbor1 = 0;
+				 neighbor2 = 0;
+			}
+ 
+			if (magnitude >= neighbor1 && magnitude >= neighbor2) {
+			  result[idx] = magnitude;
+			}
+		 }
+	  }
+ 
+	  return result;
+	}
+ 
+	doubleThreshold(lowThreshold: number, highThreshold: number): Uint8Array {
+	  const result = new Uint8Array(this.width * this.height);
+	  const suppressedEdges = this.nonMaximumSuppression();
+	  const strong = 255;
+	  const weak = 128;
+ 
+	  for (let i = 0; i < this.height; i++) {
+		 for (let j = 0; j < this.width; j++) {
+			const idx = i * this.width + j;
+			const magnitude = suppressedEdges[idx];
+ 
+			if (magnitude >= highThreshold) {
+			  result[idx] = strong;
+			} else if (magnitude >= lowThreshold) {
+			  result[idx] = weak;
+			}
+		 }
+	  }
+ 
+	  return result;
+	}
+ 
+	hysteresis(thresholdResult: Uint8Array): Uint8Array {
+	  const final = new Uint8Array(this.width * this.height);
+	  const strong = 255;
+	  const weak = 128;
+ 
+	  // First pass: mark strong edges
+	  for (let i = 0; i < this.height; i++) {
+		 for (let j = 0; j < this.width; j++) {
+			const idx = i * this.width + j;
+			if (thresholdResult[idx] === strong) {
+			  final[idx] = strong;
+			}
+		 }
+	  }
+ 
+	  // Second pass: check weak edges
+	  let edgeFound: boolean;
+	  do {
+		 edgeFound = false;
+		 for (let i = 1; i < this.height - 1; i++) {
+			for (let j = 1; j < this.width - 1; j++) {
+			  const idx = i * this.width + j;
+			  if (thresholdResult[idx] === weak && !final[idx]) {
+				 // Check 8-connected neighbors
+				 for (let ni = -1; ni <= 1; ni++) {
+					for (let nj = -1; nj <= 1; nj++) {
+					  if (final[(i + ni) * this.width + (j + nj)] === strong) {
+						 final[idx] = strong;
+						 edgeFound = true;
+						 break;
+					  }
+					}
+					if (final[idx] === strong) break;
+				 }
+			  }
+			}
+		 }
+	  } while (edgeFound);
+ 
+	  return final;
+	}
+ }
+ 
+ // Main edge detection function
+ export const detectEdges = async (
+	imageData: Uint8Array,
+	width: number,
+	height: number,
+	options: {
+	  gaussianSigma?: number;
+	  lowThreshold?: number;
+	  highThreshold?: number;
+	}
+ ): Promise<Uint8Array> => {
+	const {
+	  gaussianSigma = 1.4,
+	  lowThreshold = 20,
+	  highThreshold = 40,
+	} = options;
+ 
+	const processor = new ImageProcessor(imageData, width, height);
+ 
+	// Step 1: Convert to grayscale
+	processor.toGrayscale();
+ 
+	// Step 2: Apply Gaussian blur
+	processor.gaussianBlur(gaussianSigma);
+ 
+	// Step 3: Compute gradients
+	processor.computeGradients();
+ 
+	// Step 4 & 5: Apply double threshold
+	const thresholdResult = processor.doubleThreshold(lowThreshold, highThreshold);
+ 
+	// Step 6: Edge tracking by hysteresis
+	const finalResult = processor.hysteresis(thresholdResult);
+ 
+	return finalResult;
+ };
+
+

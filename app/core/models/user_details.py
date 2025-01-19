@@ -29,6 +29,11 @@ class UserDetails(models.Model):
          return True
       return False
    
+   def updateCount(self):
+      self.invoices_generated += 1
+      self.save()
+      return self.invoices_generated
+   
    
    def update_to_pro(self):
       self.package = Package.Pro

@@ -1,4 +1,5 @@
 import hashlib
+import random
 from django.db import models
 
 from core.utils import * 
@@ -53,8 +54,15 @@ class Company(models.Model):
 
    def generate_code(self, mystring):
     # Convert the string to bytes, then convert each byte to a hex representation
-    hex_string = mystring.encode('utf-8').hex()
-    return f'{hex_string[:6]}{datetime.now().strftime("%Y%m%d%H%M%S")}'
+    random_number = f"{round(random.random() * 100):02}"
+    arr = mystring.split(" ")
+    if len(arr) == 1:
+      return f'{mystring[:2]}{random_number}'
+    elif len(mystring) >= 2:
+       return f'{mystring[0][:1]}{mystring[1][:1]}{random_number}'
+    else:
+       return
+   
 
    
    @staticmethod

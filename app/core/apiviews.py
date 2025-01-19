@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.exceptions import NotFound
 from rest_framework.parsers import MultiPartParser, FormParser
-from .models import Address, BillTo, Company, Job, InvoiceTemplate
+from .models import Address, BillTo, Company, Job, InvoiceTemplate, UserDetails
 from .serializers import AddressSerializer, BillToSerializer, CompanySerializer, CompanyLogoSerializer, JobSerializer, InvoiceTemplate, GeneratedInvoiceSerializer, InvoiceTemplateSerializer, TaxCompanySerializer
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -27,16 +27,21 @@ class CustomRegisterView(RegisterView):
         try:
             # Call the parent's create method to handle registration
             response = super().create(request, *args, **kwargs)
-
+            logging.info(f"EISH>> {response.data}")
             # Get the registered user
-            user = self.get_user()
+            # for item in dir(self):
+            #     attr = getattr(self, item)
+            #     logging.info(f"{item}: {type(attr)}")
+                
+            user = response.data['user']
+            logging.info(f"USER: {user.get('access')}")
             # Modify the response to include additional fields
             custom_response = {
-                'key': response.data.get('key'),  # Authentication key
-                'user_id': user.id,              # User ID
-                'email': user.email,             # User email
-                'first_name': user.first_name,   # User first name
-                'last_name': user.last_name,     # User last name
+                'key': response.data.get('access'),  # Authentication key
+                'user_id': str(user.get('pk')),              # User ID
+                'email': user.get('email'),             # User email
+                'first_name': user.get('first_name'),   # User first name
+                'last_name': user.get('last_name')     # User last name
             }
 
             logging.info(f"Custom Response: {custom_response}")
@@ -54,20 +59,21 @@ class CustomLoginView(LoginView):
             logging.info("-------- WE LOGGING IN ----------")
             original_response = super().get_response()
             company_id = None
-            user = self.user
+            logging.info(original_response.data)
+            user = original_response.data['user']
             
-            company = Company.objects.filter(user_id=user.id).first()
+            company = Company.objects.filter(user_id=user.get('pk')).first()
             if company:
                 company_id = company.id
             
             # Add custom fields to the response
             custom_data = {
-                'key': original_response.data['key'],
-                'user_id': user.id,
-                'email': user.email,
+                'key': original_response.data['access'],
+                'user_id': str(user.get('pk')),
+                'email': user.get('email'), 
                 'company_id': company_id,
-                'first_name': user.first_name,
-                'last_name': user.last_name,
+                'first_name': user.get('first_name'),
+                'last_name': user.get('last_name')
             }
             return Response(custom_data)
         except Exception as e:
@@ -282,7 +288,9 @@ class InvoiceTemplateView(APIView):
            serializer.save(user=request.user)
            if request.data.get('status') != 'QUOTE':
                print(serializer.data['id'])
-            #    print(serializer.data.status)
+               userdetails = get_object_or_404(UserDetails, user_id=request.user)
+               userdetails.updateCount()
+               logging.info(serializer.data)
             #    GeneratedInvoiceSerializer()
            return Response(serializer.data, status=201)
        return Response(serializer.errors, status=400)

@@ -180,11 +180,13 @@ AUTH_USER_MODEL = 'myaccount.CustomUser'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        # 'rest_framework.authentication.TokenAuthentication',
     ],
 }
 
 REST_AUTH = {
+    'USE_JWT': True,
     'REGISTER_SERIALIZER': 'myaccount.serializer.CustomRegisterSerializer',
 }
 

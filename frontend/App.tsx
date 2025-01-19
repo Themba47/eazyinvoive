@@ -12,6 +12,7 @@ import RegisterScreen from './screens/auth/RegisterScreen';
 import ForgotPasswordScreen from './screens/auth/ForgotPasswordScreen';
 import HomeScreen from './screens/src/HomeScreen';
 import EditProfileScreen from './screens/src/EditProfileScreen';
+import CompanyProfileScreen from './screens/src/CompanyProfileScreen';
 import CompanyPage1 from './screens/src/CompanyPage1';
 import CompanyForm from './screens/src/CompanyForm';
 import AddressForm from './screens/src/AddressForm';
@@ -23,6 +24,10 @@ import InvoiceSetup from './screens/src/InvoiceSetup';
 import PreviewScreen from './screens/src/PreviewScreen';
 import CreateInvoice from './screens/src/CreateInvoice';
 import ViewInvoice from './screens/src/ViewInvoice';
+import ManageProfile from './screens/src/ManageProfile';
+import EditAddressScreen from './screens/src/EditAddressScreen';
+import ScanDocumentScreen from './screens/src/ScanDocumentScreen';
+import SignatureScreen from './screens/src/SignatureScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -36,7 +41,8 @@ const TabNavigator = () => (
         let iconName;
 
         if (route.name === 'Home') iconName = 'home-outline';
-        else if (route.name === 'My Jobs') iconName = 'search-outline';
+        else if (route.name === 'My Jobs') iconName = 'briefcase';
+        else if (route.name === 'Signature') iconName = 'camera';
         else if (route.name === 'Create Invoice') iconName = 'create';
         else if (route.name === 'Profile') iconName = 'person-outline';
 
@@ -48,8 +54,9 @@ const TabNavigator = () => (
   >
     <Tab.Screen name="Home" component={HomeScreen} options={{ headerShown: true }}/>
     <Tab.Screen name="My Jobs" component={MyJobsListScreen} options={{ headerShown: true }} />
+    <Tab.Screen name="Signature" component={SignatureScreen} options={{ headerShown: false}} />
     <Tab.Screen name="Create Invoice" component={CreateInvoice} options={{ headerShown: true }}/>
-    <Tab.Screen name="Profile" component={DrawNavigator} options={{ headerShown: false }}/>
+    <Tab.Screen name="Profile" component={ManageProfile} options={{ headerShown: true }}/>
   </Tab.Navigator>
 );
 
@@ -85,6 +92,10 @@ const App: React.FC = () => {
           <Stack.Screen name="Preview" component={PreviewScreen} options={{ headerShown: true }} />
           <Stack.Screen name="AddService" component={AddService} options={{ headerShown: true }} />
           <Stack.Screen name="ViewInvoice" component={ViewInvoice} options={{ headerShown: true }} />
+          <Stack.Screen name="My Profile" component={EditProfileScreen} options={{ headerShown: true }} />
+          <Stack.Screen name="My Company" component={CompanyProfileScreen} options={{ headerShown: true }} />
+          <Stack.Screen name="Edit Address" component={EditAddressScreen} options={{ headerShown: true }} />
+          {/* <Stack.Screen name="Scanner" component={ScanDocumentScreen} options={{ headerShown: false }}/> */}
           {/* Add other screens like Home, etc. */}
         </Stack.Navigator>
       </NavigationContainer>

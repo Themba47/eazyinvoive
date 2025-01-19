@@ -42,7 +42,7 @@ export default ({ route, navigation }) => {
 			text1: 'Success',
 			text2: 'Lets Go',
 		 });
-	navigation.navigate('AddService');
+	navigation.navigate('My Jobs');
   }
 
   return (
