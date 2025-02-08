@@ -98,6 +98,7 @@ export default ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.body}>
       {pdfPath ? (
         <WebView
           originWhitelist={['*']}
@@ -105,6 +106,7 @@ export default ({ route, navigation }) => {
           style={styles.webview}
         />
       ) : null}
+      </View>
       <View style={styles.buttonContainer}>
         <TouchableOpacity onPress={handleSave}>
           <Text>Save Locally</Text>
@@ -131,7 +133,11 @@ const styles = StyleSheet.create({
 	 backgroundColor: 'transparent',
 	 borderRadius: 20,
   },
+  body: {
+    flex: 9,
+  },
   buttonContainer: {
+    flex: 1,
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',

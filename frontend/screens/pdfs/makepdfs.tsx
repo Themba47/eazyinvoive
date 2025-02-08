@@ -18,90 +18,73 @@ export const generateInvoicePdf = async (onSavePath, data) => {
   const timesRomanBoldFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
 
   // Add Text and Design
-  const { height } = page.getSize();
+  const { width, height } = page.getSize();
   const margin = 50;
 
+  const drawText = (text, x, y, size = 12, color = rgb(0, 0, 0)) => {
+    page.drawText(text, { x, y, size, timesRomanFont, color });
+  };
+
+  const drawRectangle = (x, y, w, h, color = rgb(0.9, 0.9, 0.9)) => {
+      page.drawRectangle({ x, y, width: w, height: h, color });
+  };
+
   // Header
-  page.drawText('Accelerit Technologies (PTY) LTD', {
-    x: margin,
-    y: height - 50,
-    size: 14,
-    font: timesRomanBoldFont,
-  });
+  drawText('UNPAID', 50, height - 50, 16, rgb(1, 0, 0));
+  drawText('Accelerit Technologies (PTY) LTD', 350, height - 80, 12);
+  drawText('35A Rietfontein Road', 350, height - 100);
+  drawText('Edenburg, Rivonia, 2198', 350, height - 120);
+  drawText('Email: info@accelerit.co.za', 350, height - 140);
+  drawText('Tel: +27(0)105000220', 350, height - 160);
+  drawText('Company Reg: 2011/110345/07', 350, height - 180);
+  drawText('Vat Reg Number: 4690267804', 350, height - 200);
+  drawText('Icasa Registration: 0377/CECNS/JUNE/2013', 350, height - 220);
 
-  page.drawText('35A Rietfontein Road, Edenburg, Rivonia, 2198', {
-    x: margin,
-    y: height - 70,
-    size: 10,
-    font: timesRomanFont,
-  });
-
-  page.drawText('Email: info@accelerit.co.za | Tel: +27(0)105000220', {
-    x: margin,
-    y: height - 90,
-    size: 10,
-    font: timesRomanFont,
-  });
-
-  page.drawText('Company Reg: 2011/110345/07 | Vat Reg Number: 4690267804', {
-    x: margin,
-    y: height - 110,
-    size: 10,
-    font: timesRomanFont,
-  });
-
-  page.drawText('Icasa Registration: 0377/CECNS/JUNE/2013', {
-    x: margin,
-    y: height - 130,
-    size: 10,
-    font: timesRomanFont,
-  });
-
-  // Invoice Info
-  page.drawText('Invoice #653710', { x: margin, y: height - 180, size: 12, font: timesRomanBoldFont });
-  page.drawText('Invoice Date: Tuesday, December 17th, 2024', { x: margin, y: height - 200, size: 10, font: timesRomanFont });
-  page.drawText('Due Date: Wednesday, January 1st, 2025', { x: margin, y: height - 220, size: 10, font: timesRomanFont });
+  // Invoice details
+  drawText('Invoice #664036', 50, height - 240, 14);
+  drawText('Invoice Date: Friday, January 17th, 2025', 50, height - 260);
+  drawText('Due Date: Saturday, February 1st, 2025', 50, height - 280);
 
   // Invoiced To
-  page.drawText('Invoiced To', { x: margin, y: height - 270, size: 12, font: timesRomanBoldFont });
-  page.drawText('Themba Sishuba', { x: margin, y: height - 290, size: 10, font: timesRomanFont });
-  page.drawText('210 Bellefield Avenue, Mondeor, Johannesburg, South Africa', {
-    x: margin,
-    y: height - 310,
-    size: 10,
-    font: timesRomanFont,
-  });
+  drawText('Invoiced To:', 50, height - 310, 14);
+  drawText('Themba Sishuba', 50, height - 330);
+  drawText('210 Bellefield Avenue', 50, height - 350);
+  drawText('Mondeor, Johannesburg, South Africa', 50, height - 370);
 
-  // Table (simplified for description)
-  page.drawText('Description', { x: margin, y: height - 370, size: 12, font: timesRomanBoldFont });
-  page.drawText('Total', { x: 400, y: height - 370, size: 12, font: timesRomanBoldFont });
+  // Table Headers with background
+  drawRectangle(50, height - 420, 495, 20, rgb(0.8, 0.8, 0.8));
+  drawText('Description', 60, height - 415, 14);
+  drawText('Total', 400, height - 415, 14);
 
-  page.drawText('Accelerit/Vuma Uncapped 50/50mbps (01/01/2025 - 31/01/2025)', {
-    x: margin,
-    y: height - 390,
-    size: 10,
-    font: timesRomanFont,
-  });
-  page.drawText('R733.00', { x: 400, y: height - 390, size: 10, font: timesRomanFont });
+  // Table Content with alternating background
+  drawRectangle(50, height - 440, 495, 20, rgb(0.95, 0.95, 0.95));
+  drawText('Accelerit/Vuma Uncapped 50/50mbps (01/02/2025 - 28/02/2025)', 60, height - 435);
+  drawText('R733.00', 400, height - 435);
 
-  // Sub Total
-  page.drawText('Sub Total', { x: margin, y: height - 430, size: 10, font: timesRomanFont });
-  page.drawText('R637.39', { x: 400, y: height - 430, size: 10, font: timesRomanFont });
+  // Totals Section with background
+  drawRectangle(50, height - 490, 495, 20, rgb(0.95, 0.95, 0.95));
+  drawText('Sub Total:', 60, height - 485);
+  drawText('R637.39', 400, height - 485);
+  drawText('15.00% ZAR VAT:', 60, height - 505);
+  drawText('R95.61', 400, height - 505);
+  drawText('Credit:', 60, height - 525);
+  drawText('R0.00', 400, height - 525);
+  drawText('Total:', 60, height - 545, 14);
+  drawText('R733.00', 400, height - 545, 14);
 
-  page.drawText('15.00% ZAR VAT', { x: margin, y: height - 450, size: 10, font: timesRomanFont });
-  page.drawText('R95.61', { x: 400, y: height - 450, size: 10, font: timesRomanFont });
-
-  page.drawText('Total', { x: margin, y: height - 470, size: 10, font: timesRomanBoldFont });
-  page.drawText('R733.00', { x: 400, y: height - 470, size: 10, font: timesRomanBoldFont });
+  // Transactions with background
+  drawRectangle(50, height - 590, 535, 20, rgb(0.8, 0.8, 0.8));
+  drawText('Transactions', 60, height - 585, 14);
+  drawText('Transaction Date', 60, height - 610);
+  drawText('Gateway', 200, height - 610);
+  drawText('Transaction ID', 300, height - 610);
+  drawText('Amount', 450, height - 610);
+  drawText('No Related Transactions Found', 60, height - 630);
 
   // Footer
-  page.drawText('Balance: R733.00', { x: margin, y: height - 530, size: 12, font: timesRomanBoldFont });
-  page.drawText('PDF Generated on Tuesday, December 17th, 2024', {
-    x: margin,
-    y: height - 550,
-    size: 10,
-    font: timesRomanFont,
-  });
+  drawText('Balance: R733.00', 50, height - 670, 14);
+  drawText('PDF Generated on Friday, January 17th, 2025', 50, height - 690);
+  drawText('Powered by TCPDF (www.tcpdf.org)', 50, height - 710, 10);
   // Save the PDF
   const pdfBytes = await pdfDoc.save();
 

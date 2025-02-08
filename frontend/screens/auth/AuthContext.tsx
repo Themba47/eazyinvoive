@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 
 interface AuthContextType {
   authToken: string | null;
@@ -27,7 +28,7 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children, navigation }) => {
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [authToken, setAuthTokenState] = useState<string | null>(null);
   const [userId, setUserIdState] = useState<string | null>(null);
   const [companyId, setCompanyIdState] = useState<string | null>(null);
@@ -95,7 +96,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children, navigation
       setAuthTokenState(null);
       setUserIdState(null);
       setCompanyIdState(null)
-      navigation.navigate('Login');
     } catch (error) {
       console.error('Failed to logout', error);
     }

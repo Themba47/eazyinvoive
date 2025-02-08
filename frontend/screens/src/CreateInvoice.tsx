@@ -27,6 +27,7 @@ export default({ navigation }) => {
   const [notes, setNotes] = useState("")
   const [myclients, setMyClients] = useState([]); 
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [invoiceNumber, setInvoiceNumber] = useState('')
   const [date, setDate] = useState(new Date());
   const [currentDate, setCurrentDate] = useState('');
 
@@ -63,6 +64,12 @@ export default({ navigation }) => {
   const [dueDate, setDueDate] = useState(false)
   const [isTaxIncluded, setIsTaxIncluded] = useState(false);
   const options = ["QUOTE", "UNPAID", "PAID"];
+
+  const checkOption = (opt) => {
+    if(opt != "QUOTE") {
+      setInvoiceNumber('123456')
+    }
+  }
 
   const calculateSubtotal = (bool: boolean) => {
     if(bool && total > 0) {
@@ -140,6 +147,7 @@ export default({ navigation }) => {
       selectedJob: selectedJob,
       isDueDate: dueDate,
       isTaxIncluded: isTaxIncluded,
+      invoiceNumber: invoiceNumber,
       total: total,
       subtotal: subtotal,
       taxpercentage: taxpercentage * 100
@@ -218,7 +226,7 @@ export default({ navigation }) => {
               styles.option,
               selectedOption === option ? styles.selectedOption : null,
             ]}
-            onPress={() => setSelectedOption(option)}
+            onPress={() => {setSelectedOption(option); checkOption(selectedOption)}}
           >
             <Text
               style={[
@@ -231,7 +239,7 @@ export default({ navigation }) => {
           </TouchableOpacity>
         ))}
       </View>
-
+      {selectedOption != "QUOTE" ? <Text style={styles.label}>Invoice: Number: { invoiceNumber }</Text> : null}
       <View>
         <Text style={styles.label}>Bill To:</Text>
         <TouchableOpacity
