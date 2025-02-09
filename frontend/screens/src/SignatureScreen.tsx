@@ -1,17 +1,61 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useContext } from 'react';
 import { View, Button, Dimensions, Text, Alert, StyleSheet } from 'react-native';
 import { WebView } from 'react-native-webview';
+import { baseStyles } from '../stylesheet';
+import { backendApp } from '../utils';
+import axios from 'axios';
+import { fetchCsrfToken, getCsrfToken } from '../auth/CsrfService';
+import { AuthContext } from '../auth/AuthContext';
+import Toast from 'react-native-toast-message';
 
 export default () => {
+  const { authToken, userId } = useContext(AuthContext);
   const [signature, setSignature] = useState<string | null>(null);
   const canvasWidth = Dimensions.get('window').width;
   const canvasHeight = Dimensions.get('window').height * .8;
   const webViewRef = useRef(null);
 
+  const handleClickSave = () => {
+    if (webViewRef.current) {
+      webViewRef.current.injectJavaScript(`window.saveSignature(); true;`);
+    }
+  }
+  
+
   // Handle the received base64 signature from WebView
   const handleSave = (base64Signature: string) => {
     setSignature(base64Signature);
     Alert.alert('Signature Saved!', 'Your signature has been saved.');
+  };
+
+  const uploadSignature = async () => {
+    try {
+      await fetchCsrfToken();
+      const response = await axios.post(`${backendApp()}/api/auth/login/`, {
+        body: JSON.stringify({ signature: signature }),
+      },
+      {
+        headers: {
+            Authorization: `Bearer ${authToken}`, 
+            'X-CSRFToken': getCsrfToken(),
+        },
+        withCredentials: true, // Ensures cookies are sent with the request
+    });
+
+      // Show success toast
+    Toast.show({
+      type: 'success',
+      text1: 'Success',
+      text2: 'Signature Saved!',
+    });
+    } catch (e) {
+      console.error(e.response?.data || e.message);
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Failed to upload signature.',
+      });
+    }
   };
 
   // Handle clearing the signature
@@ -81,7 +125,7 @@ export default () => {
         const pos = getTouchPos(canvas, e);
         ctx.lineTo(pos.x, pos.y);
         ctx.stroke();
-		  ctx.lineWidth = 2;
+		  ctx.lineWidth = 4;
       });
 
       // Stop drawing
@@ -107,7 +151,7 @@ export default () => {
 `;
 
   return (
-    <View style={styles.container}>
+    <View style={baseStyles.container}>
       <WebView
 		  ref={webViewRef}
         originWhitelist={['*']}
@@ -116,6 +160,7 @@ export default () => {
 		  style={styles.webview}
       />
       <Button title="Clear Signature" onPress={handleClear} />
+      <Button title="Save Signature" onPress={handleClickSave} />
       {signature && (
         <View style={{ marginTop: 20 }}>
           <Text>Signature Saved:</Text>
@@ -127,9 +172,6 @@ export default () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-	 flex: 1,
-  },
   webview: {
 	 flex: 1,
 	 margin: 20,
