@@ -3,18 +3,20 @@ import logging
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import render, get_object_or_404
+from django.contrib.auth import get_user_model
 from dj_rest_auth.views import LoginView, LogoutView
 from dj_rest_auth.registration.views import RegisterView
 
-from rest_framework import status
+from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.exceptions import NotFound
 from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Address, BillTo, Company, Job, InvoiceTemplate, UserDetails
-from .serializers import AddressSerializer, BillToSerializer, CompanySerializer, CompanyLogoSerializer, JobSerializer, InvoiceTemplate, GeneratedInvoiceSerializer, InvoiceTemplateSerializer, TaxCompanySerializer
+from .serializers import AddressSerializer, BillToSerializer, CompanySerializer, CompanyLogoSerializer, JobSerializer, InvoiceTemplate, GeneratedInvoiceSerializer, InvoiceTemplateSerializer, TaxCompanySerializer, UserDetailsSerializer
 
+User = get_user_model()
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def csrf_token_view(request):
@@ -43,7 +45,8 @@ class CustomRegisterView(RegisterView):
                 'first_name': user.get('first_name'),   # User first name
                 'last_name': user.get('last_name')     # User last name
             }
-
+            
+            userdetails = UserDetails.objects.create(user=get_object_or_404(User, pk=user.get('pk')))
             logging.info(f"Custom Response: {custom_response}")
             return Response(custom_response, status=response.status_code)
 
@@ -286,11 +289,11 @@ class InvoiceTemplateView(APIView):
        serializer = InvoiceTemplateSerializer(data=request.data)
        if serializer.is_valid():
            serializer.save(user=request.user)
-           if request.data.get('status') != 'QUOTE':
-               print(serializer.data['id'])
-               userdetails = get_object_or_404(UserDetails, user_id=request.user)
-               userdetails.updateCount()
-               logging.info(serializer.data)
+        #    if request.data.get('status') != 'QUOTE':
+        #        print(serializer.data['id'])
+        #        userdetails = get_object_or_404(UserDetails, user_id=request.user)
+        #        userdetails.updateCount()
+        #        logging.info(serializer.data)
             #    GeneratedInvoiceSerializer()
            return Response(serializer.data, status=201)
        return Response(serializer.errors, status=400)
@@ -304,4 +307,29 @@ class InvoiceTemplateView(APIView):
             logging.info(f"++++++++++++++++ Invoice deleted successfully ++++++++++++++++")
             return Response({"message": "Invoice deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
         except Job.DoesNotExist:
-            return Response({"error": "Invoice not found"}, status=status.HTTP_404_NOT_FOUND) 
+            return Response({"error": "Invoice not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        
+class UserDetailsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """Retrieve the authenticated user's details"""
+        logging.info(f"++++++++++++++++ {request.user} ++++++++++++++++")
+        try:
+            user_details = UserDetails.objects.get(user=request.user)
+            logging.info(f">>>> {user_details} <<<<<")
+            serializer = UserDetailsSerializer(user_details)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except UserDetails.DoesNotExist as e:
+            logging.error(e)
+            return Response({"error": "User details not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    def post(self, request):
+        """Increment invoices_generated for the user"""
+        try:
+            user_details = UserDetails.objects.get(user=request.user)
+            new_count = user_details.updateCount()
+            return Response({"invoices_generated": new_count}, status=status.HTTP_200_OK)
+        except UserDetails.DoesNotExist:
+            return Response({"error": "User details not found"}, status=status.HTTP_404_NOT_FOUND)

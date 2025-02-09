@@ -14,6 +14,7 @@ import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { Ionicons } from '@expo/vector-icons';
 import SearchComponent from '../components/SearchComponent';
 import { backendApp } from '../utils';
+import { baseStyles } from '../stylesheet';
 
 const Item = ({item, onPress, backgroundColor, textColor}) => (
   <TouchableOpacity onPress={onPress} style={[styles.item, {backgroundColor}]}>
@@ -104,7 +105,7 @@ export default ({ navigation }) => {
   )};
 
   return (
-    <View style={styles.container}>
+    <View style={baseStyles.container}>
       <View style={styles.div1}>
         <SearchComponent
           data={jobs} 
@@ -126,11 +127,6 @@ export default ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-    paddingTop: 20,
-  },
   card: {
     backgroundColor: '#f0f4fc',
     marginVertical: 4,

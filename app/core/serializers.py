@@ -1,6 +1,8 @@
 from rest_framework import serializers
-from .models import Address, BillTo, Company, Job, InvoiceTemplate, GeneratedInvoice
+from .models import Address, BillTo, Company, Job, InvoiceTemplate, GeneratedInvoice, UserDetails
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:
@@ -77,5 +79,18 @@ class InvoiceTemplateSerializer(serializers.ModelSerializer):
        model = InvoiceTemplate
        fields = ['id', 'user', 'name', 'client', 'items', 'status', 
                 'Active', 'date_updated', 'date_created']
-       read_only_fields = ['Active', 'date_updated', 'date_created']      
+       read_only_fields = ['Active', 'date_updated', 'date_created'] 
+       
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "username", "email"]
+
+class UserDetailsSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = UserDetails
+        fields = "__all__"    
 

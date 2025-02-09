@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from core.apiviews import csrf_token_view, AddJobAPIView, AddressAPIView, BillToView, CompanyView, CustomRegisterView, CustomLoginView, CustomLogoutView, InvoiceTemplateView, JobsAPIView, UploadLogo, TaxCompanyView
+from core.apiviews import csrf_token_view, AddJobAPIView, AddressAPIView, BillToView, CompanyView, CustomRegisterView, CustomLoginView, CustomLogoutView, InvoiceTemplateView, JobsAPIView, UploadLogo, TaxCompanyView, UserDetailsAPIView
 
 urlpatterns = [
     path('kwam/', admin.site.urls),
@@ -38,5 +38,6 @@ urlpatterns = [
     path('api/billto/<int:user_id>/', BillToView.as_view(), name='bill-to'),
     path('api/invoices/', InvoiceTemplateView.as_view(), name='invoice-templates'),
     path('api/invoices/<int:invoiceId>/', InvoiceTemplateView.as_view(), name='invoice-templates'),
+    path('api/userdetails/', UserDetailsAPIView.as_view(), name='user-details'),
     path('api/csrf/', csrf_token_view, name='csrf'),
 ]

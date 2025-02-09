@@ -40,11 +40,11 @@ const TabNavigator = () => (
       tabBarIcon: ({ color, size }) => {
         let iconName;
 
-        if (route.name === 'Home') iconName = 'home-outline';
+        if (route.name === 'Home') iconName = 'home';
         else if (route.name === 'My Jobs') iconName = 'briefcase';
         else if (route.name === 'Signature') iconName = 'camera';
         else if (route.name === 'Create Invoice') iconName = 'create';
-        else if (route.name === 'Profile') iconName = 'person-outline';
+        else if (route.name === 'Profile') iconName = 'person';
 
         return <Ionicons name={iconName as string} size={size} color={color} />;
       },
