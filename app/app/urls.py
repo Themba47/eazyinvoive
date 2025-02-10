@@ -14,9 +14,11 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
-from core.apiviews import csrf_token_view, AddJobAPIView, AddressAPIView, BillToView, CompanyView, CustomRegisterView, CustomLoginView, CustomLogoutView, InvoiceTemplateView, JobsAPIView, UploadLogo, TaxCompanyView, UserDetailsAPIView
+from core.apiviews import *
 
 urlpatterns = [
     path('kwam/', admin.site.urls),
@@ -39,5 +41,6 @@ urlpatterns = [
     path('api/invoices/', InvoiceTemplateView.as_view(), name='invoice-templates'),
     path('api/invoices/<int:invoiceId>/', InvoiceTemplateView.as_view(), name='invoice-templates'),
     path('api/userdetails/', UserDetailsAPIView.as_view(), name='user-details'),
+    path('api/signature/', UploadSignature.as_view(), name="upload-siganture"),
     path('api/csrf/', csrf_token_view, name='csrf'),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

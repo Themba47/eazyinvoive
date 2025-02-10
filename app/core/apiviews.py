@@ -1,9 +1,11 @@
+import base64
 import logging
 
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth import get_user_model
+from django.core.files.base import ContentFile
 from dj_rest_auth.views import LoginView, LogoutView
 from dj_rest_auth.registration.views import RegisterView
 
@@ -13,7 +15,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.exceptions import NotFound
 from rest_framework.parsers import MultiPartParser, FormParser
-from .models import Address, BillTo, Company, Job, InvoiceTemplate, UserDetails
+from .models import Address, BillTo, Company, Job, InvoiceTemplate, Signature, UserDetails
 from .serializers import AddressSerializer, BillToSerializer, CompanySerializer, CompanyLogoSerializer, JobSerializer, InvoiceTemplate, GeneratedInvoiceSerializer, InvoiceTemplateSerializer, TaxCompanySerializer, UserDetailsSerializer
 
 User = get_user_model()
@@ -333,3 +335,35 @@ class UserDetailsAPIView(APIView):
             return Response({"invoices_generated": new_count}, status=status.HTTP_200_OK)
         except UserDetails.DoesNotExist:
             return Response({"error": "User details not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        
+
+class UploadSignature(APIView):
+    
+    def get(self, request):
+        try:
+            signature = Signature.objects.get(user=request.user)
+            signature_url = request.build_absolute_uri(signature.signature.url)
+            return Response({"signature": signature_url}, status=200)
+        except Signature.DoesNotExist:
+            return Response({"signature": None}, status=200)
+    
+    def post(self, request):
+        try:
+            data = request.data.get("signature")  # Get Base64 string
+            if not data:
+                return Response({"error": "No signature data provided"}, status=400)
+
+            # Decode and save as an image
+            format, imgstr = data.split(";base64,")  # Extract base64 format
+            ext = format.split("/")[-1]  # Extract file extension (e.g., png)
+
+            signature_file = ContentFile(base64.b64decode(imgstr), name=f"signature_{request.user.id}.{ext}")
+            
+            # Save to a model (optional)
+            Signature.objects.create(user=request.user, signature=signature_file)
+            logging.info(f"{'<' * 20} Signature Saved {'>' * 20}")
+            return Response({"message": "Signature uploaded successfully!"})
+        except Exception as e:
+            logging.error(f"Error: {e}")
+
