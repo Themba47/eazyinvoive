@@ -42,7 +42,7 @@ const TabNavigator = () => (
 
         if (route.name === 'Home') iconName = 'home';
         else if (route.name === 'My Jobs') iconName = 'briefcase';
-        else if (route.name === 'Signature') iconName = 'camera';
+        else if (route.name === 'Signature') iconName = 'pencil';
         else if (route.name === 'Create Invoice') iconName = 'create';
         else if (route.name === 'Profile') iconName = 'person';
 

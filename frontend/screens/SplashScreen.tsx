@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Image, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 const SplashScreen: React.FC = () => {
@@ -15,8 +15,9 @@ const SplashScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <ActivityIndicator size="large" color="#000" />
-      <Text style={styles.text}>EazyInvoice</Text>
+      {/* <ActivityIndicator size="large" color="#fff" />
+      <Text style={styles.text}>Weakestlink</Text> */}
+      <Image source={require("../assets/eazyinvoice.png")} style={styles.image} />
     </View>
   );
 };
@@ -24,6 +25,11 @@ const SplashScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   text: { marginTop: 20, fontSize: 24, fontWeight: 'bold' },
+  image: {
+    width: 200, // Adjust as needed
+    height: 200, // Adjust as needed
+    resizeMode: "contain", // Keeps aspect ratio
+  },
 });
 
 export default SplashScreen;

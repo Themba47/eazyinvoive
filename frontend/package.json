@@ -23,7 +23,9 @@
     "buffer": "^6.0.3",
     "date-fns": "^4.1.0",
     "expo": "~52.0.23",
+    "expo-camera": "~16.0.11",
     "expo-file-system": "~18.0.6",
+    "expo-image-manipulator": "~13.0.6",
     "expo-image-picker": "~16.0.3",
     "expo-media-library": "~17.0.4",
     "expo-sharing": "~13.0.0",
@@ -42,9 +44,7 @@
     "react-native-toast-message": "^2.2.1",
     "react-native-vector-icons": "^10.2.0",
     "react-native-web": "~0.19.13",
-    "react-native-webview": "13.12.5",
-    "expo-image-manipulator": "~13.0.6",
-    "expo-camera": "~16.0.11"
+    "react-native-webview": "13.12.5"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
