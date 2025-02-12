@@ -176,8 +176,8 @@ class UploadLogo(APIView):
 class AddressAPIView(APIView):
     serializer_class = AddressSerializer
 
-    def get(self, request):
-        company_id = request.query_params.get('company_id')
+    def get(self, request, company_id=None):
+        company_id = get_object_or_404(Company, pk=company_id)
         if not company_id:
             return Response({'error': 'company_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
         

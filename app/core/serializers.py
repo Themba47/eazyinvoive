@@ -4,21 +4,6 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-class AddressSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Address
-        fields = [
-            'company_id',
-            'street',
-            'complex_apartment',
-            'city',
-            'province',
-            'postal_code',
-            'country',
-            'address_type',
-        ]
-
-
 class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
@@ -38,6 +23,22 @@ class CompanySerializer(serializers.ModelSerializer):
             if data.get('reg_number'):
                 raise serializers.ValidationError("Registration number should not be provided for Freelancer or Informal companies.")
         return data
+    
+    
+class AddressSerializer(serializers.ModelSerializer):
+    company_id = CompanySerializer()
+    class Meta:
+        model = Address
+        fields = [
+            'company_id',
+            'street',
+            'complex_apartment',
+            'city',
+            'province',
+            'postal_code',
+            'country',
+            'address_type',
+        ]
     
  
 class TaxCompanySerializer(serializers.ModelSerializer):
@@ -82,10 +83,17 @@ class InvoiceTemplateSerializer(serializers.ModelSerializer):
        read_only_fields = ['Active', 'date_updated', 'date_created'] 
        
 
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('first_name', 'last_name')
+       
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "username", "email"]
+        fields = ['id', 'username', 'first_name', 'last_name', 'email']
+        
 
 class UserDetailsSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)

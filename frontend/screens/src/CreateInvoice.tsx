@@ -14,7 +14,7 @@ import AddServiceModal from "../components/AddServiceModal";
 import { baseStyles, buttonColor } from "../stylesheet";
 
 export default({ navigation }) => {
-  const { authToken, userId } = useContext(AuthContext);
+  const { authToken, userId, companyId } = useContext(AuthContext);
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [selectedClient, setSelectedClient] = useState('');
@@ -32,6 +32,34 @@ export default({ navigation }) => {
   const [invoiceNumber, setInvoiceNumber] = useState('')
   const [date, setDate] = useState(new Date());
   const [currentDate, setCurrentDate] = useState('');
+  const [address, setAddress] = useState([
+    {
+      address_type: "",
+      city: "",
+      company_id: {
+        Active: false,
+        company_code: "",
+        company_name: "",
+        company_type: "",
+        contact_email: "",
+        contact_number: "",
+        date_created: "",
+        date_updated: "",
+        details: null,
+        id: null,
+        logo: "",
+        other_vital_info: [], // Keeping it as an empty array
+        reg_number: "",
+        tax_number: "",
+        user_id: null,
+      },
+      complex_apartment: "",
+      country: "",
+      postal_code: "",
+      province: "",
+      street: "",
+    },
+  ]); // Initial empty structure
 
   const [total, setTotal] = useState(0)
   const [subtotal, setSubTotal] = useState(0)
@@ -44,6 +72,15 @@ export default({ navigation }) => {
     try {
       const response = await axios.get(`${backendApp()}/api/billto/${userId}/`)
       setMyClients(response.data.myjobs);
+    } catch (error) {
+      console.error('Error:', error.message)
+    }
+  };
+
+  const getMyCompanyDetails = async () => {
+    try {
+      const response = await axios.get(`${backendApp()}/api/address/${companyId}/`)
+      setAddress(response.data) 
     } catch (error) {
       console.error('Error:', error.message)
     }
@@ -61,6 +98,7 @@ export default({ navigation }) => {
      setCurrentDate(format(new Date(), 'dd MMM yyyy'));
      getMyClients()
      getInvoiceNumber()
+     getMyCompanyDetails()
      getMyJobs()
    }, [])// Temporary hardcoded list of countries
 
@@ -96,7 +134,7 @@ export default({ navigation }) => {
   const toggleSwitch = () => {
     setIsTaxIncluded(prev => {
       const newValue = !prev;
-      console.log(newValue);
+      // console.log(newValue);
       calculateSubtotal(newValue);
       return newValue;
     });
@@ -143,6 +181,7 @@ export default({ navigation }) => {
   const handlePreview = () => {
     const formData = {
       userId: userId,
+      address: address[0],
       description: description,
       price: price,
       clientId: clientId,
@@ -169,6 +208,7 @@ export default({ navigation }) => {
       taxamount: total * taxpercentage,
       currency: 'R'
      };
+     console.log(">>>> " + formData.address.company_id.company_name)
      handleSubmit(formData)
      navigation.navigate('Preview', {data: formData});
   }

@@ -39,14 +39,14 @@ export const generateInvoicePdf = async (onSavePath, data) => {
   if(data.selectedOption == 'QUOTE') {
     drawText(data.selectedOption, 500, height - 50, 16, rgb(0, 0, 0));
   }
-  drawText('Accelerit Technologies (PTY) LTD', 350, height - 80, 12);
-  drawText('35A Rietfontein Road', 350, height - 100);
-  drawText('Edenburg, Rivonia, 2198', 350, height - 120);
-  drawText('Email: info@accelerit.co.za', 350, height - 140);
-  drawText('Tel: +27(0)105000220', 350, height - 160);
-  drawText('Company Reg: 2011/110345/07', 350, height - 180);
-  drawText('Vat Reg Number: 4690267804', 350, height - 200);
-  drawText('Icasa Registration: 0377/CECNS/JUNE/2013', 350, height - 220);
+  drawText(data.address.company_id.company_name, 350, height - 80, 12);
+  drawText(data.address.street, 350, height - 100);
+  drawText(`${data.address.city}, ${data. address.province}`, 350, height - 120);
+  drawText(data.address.company_id.contact_email, 350, height - 140);
+  drawText(data.address.company_id.contact_number, 350, height - 160);
+  drawText(data.address.company_id.tax_number, 350, height - 180);
+  // drawText('Vat Reg Number: 4690267804', 350, height - 200);
+  // drawText('Icasa Registration: 0377/CECNS/JUNE/2013', 350, height - 220);
 
   // Invoice details
   drawText(`Invoice #${data.invoiceNumber}`, 50, height - 240, 14);
