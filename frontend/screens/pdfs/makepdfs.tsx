@@ -30,7 +30,15 @@ export const generateInvoicePdf = async (onSavePath, data) => {
   };
 
   // Header
-  drawText('UNPAID', 50, height - 50, 16, rgb(1, 0, 0));
+  if(data.selectedOption == 'UNPAID') {
+    drawText(data.selectedOption, 500, height - 50, 16, rgb(1, 0, 0));
+  }
+  if(data.selectedOption == 'PAID') {
+    drawText(data.selectedOption, 500, height - 50, 16, rgb(0, 1, 0));
+  }
+  if(data.selectedOption == 'QUOTE') {
+    drawText(data.selectedOption, 500, height - 50, 16, rgb(0, 0, 0));
+  }
   drawText('Accelerit Technologies (PTY) LTD', 350, height - 80, 12);
   drawText('35A Rietfontein Road', 350, height - 100);
   drawText('Edenburg, Rivonia, 2198', 350, height - 120);
@@ -41,49 +49,69 @@ export const generateInvoicePdf = async (onSavePath, data) => {
   drawText('Icasa Registration: 0377/CECNS/JUNE/2013', 350, height - 220);
 
   // Invoice details
-  drawText('Invoice #664036', 50, height - 240, 14);
-  drawText('Invoice Date: Friday, January 17th, 2025', 50, height - 260);
-  drawText('Due Date: Saturday, February 1st, 2025', 50, height - 280);
+  drawText(`Invoice #${data.invoiceNumber}`, 50, height - 240, 14);
+  drawText(`Invoice Date: ${data.currentDate}`, 50, height - 260);
+  if (data.isDueDate) {
+  drawText(`Due Date: ${data.duedate}`, 50, height - 280);
+  }
 
   // Invoiced To
   drawText('Invoiced To:', 50, height - 310, 14);
-  drawText('Themba Sishuba', 50, height - 330);
-  drawText('210 Bellefield Avenue', 50, height - 350);
-  drawText('Mondeor, Johannesburg, South Africa', 50, height - 370);
+  for(let i = 0, pos=330; i < 4; i++, pos+=20) {
+    drawText(data.selectedClientDetail[i], 50, height - pos);
+  }
+  // drawText('210 Bellefield Avenue', 50, height - 350);
+  // drawText('Mondeor, Johannesburg, South Africa', 50, height - 370);
 
   // Table Headers with background
-  drawRectangle(50, height - 420, 495, 20, rgb(0.8, 0.8, 0.8));
-  drawText('Description', 60, height - 415, 14);
-  drawText('Total', 400, height - 415, 14);
+  drawRectangle(50, height - 440, 495, 20, rgb(0.8, 0.8, 0.8));
+  drawText('Description', 60, height - 435, 14);
+  drawText('Total', 400, height - 435, 14);
 
   // Table Content with alternating background
-  drawRectangle(50, height - 440, 495, 20, rgb(0.95, 0.95, 0.95));
-  drawText('Accelerit/Vuma Uncapped 50/50mbps (01/02/2025 - 28/02/2025)', 60, height - 435);
-  drawText('R733.00', 400, height - 435);
+  let items_height = [480, 475]
+  data.selectedJob.forEach(element => {
+    console.log(items_height)
+    drawRectangle(50, height - items_height[0], 495, 20, rgb(0.95, 0.95, 0.95));
+    drawText(element.description, 60, height - items_height[1]);
+    if(data.quantityEnabled) {
+      drawText(element.quantity, 200, height - items_height[1]);
+    }
+    drawText(`${data.currency} ${element.price}`, 400, height - items_height[1]);
+    items_height[0] += 20
+    items_height[1] += 20
+  })
+
+  items_height[0] += 20
+  items_height[1] += 20
 
   // Totals Section with background
-  drawRectangle(50, height - 490, 495, 20, rgb(0.95, 0.95, 0.95));
-  drawText('Sub Total:', 60, height - 485);
-  drawText('R637.39', 400, height - 485);
-  drawText('15.00% ZAR VAT:', 60, height - 505);
-  drawText('R95.61', 400, height - 505);
-  drawText('Credit:', 60, height - 525);
-  drawText('R0.00', 400, height - 525);
-  drawText('Total:', 60, height - 545, 14);
-  drawText('R733.00', 400, height - 545, 14);
+  drawRectangle(50, height - items_height[0], 495, 20, rgb(0.95, 0.95, 0.95));
+  if(data.isTaxIncluded) {
+    drawText('Sub Total:', 60, height - items_height[1]);
+    drawText(`${data.currency}${data.subtotal}`, 400, height - items_height[1]);
+    items_height[0] += 20
+    items_height[1] += 20
+    drawText(`${data.taxpercentage}% ZAR VAT:`, 60, height - items_height[1]);
+    drawText(`${data.currency}${data.taxamount}`, 400, height - items_height[1]);
+  }
+  items_height[0] += 20
+  items_height[1] += 20
+  drawText('Total:', 60, height - items_height[1], 14);
+  drawText(`R${data.total}`, 400, height - items_height[1], 14);
 
   // Transactions with background
-  drawRectangle(50, height - 590, 535, 20, rgb(0.8, 0.8, 0.8));
-  drawText('Transactions', 60, height - 585, 14);
-  drawText('Transaction Date', 60, height - 610);
-  drawText('Gateway', 200, height - 610);
-  drawText('Transaction ID', 300, height - 610);
-  drawText('Amount', 450, height - 610);
-  drawText('No Related Transactions Found', 60, height - 630);
+  // drawRectangle(50, height - 590, 535, 20, rgb(0.8, 0.8, 0.8));
+  // drawText('Transactions', 60, height - 585, 14);
+  // drawText('Transaction Date', 60, height - 610);
+  // drawText('Gateway', 200, height - 610);
+  // drawText('Transaction ID', 300, height - 610);
+  // drawText('Amount', 450, height - 610);
+  // drawText('No Related Transactions Found', 60, height - 630);
 
   // Footer
   drawText('Balance: R733.00', 50, height - 670, 14);
-  drawText('PDF Generated on Friday, January 17th, 2025', 50, height - 690);
+  drawText(data.notes, 60, height - 690);
   drawText('Powered by TCPDF (www.tcpdf.org)', 50, height - 710, 10);
   // Save the PDF
   const pdfBytes = await pdfDoc.save();

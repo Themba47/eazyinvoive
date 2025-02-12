@@ -40,6 +40,12 @@ export default ({navigation}) => {
 				>
 					<Text style={styles.cardText}>Edit Profile</Text>
 				</TouchableOpacity>
+				
+				<TouchableOpacity style={styles.card}
+				onPress={() => navigation.navigate('Feedback')}
+				>
+					<Text style={styles.cardText}>Provide Feedback</Text>
+				</TouchableOpacity>
 			</View>
 			<View style={styles.row2}>
 				<TouchableOpacity

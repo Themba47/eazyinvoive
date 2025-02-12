@@ -11,9 +11,10 @@ import ReusableModalPicker from '../components/OptionsScreen';
 import { AuthContext } from '../auth/AuthContext';
 import { backendApp } from '../utils';
 import AddServiceModal from "../components/AddServiceModal";
+import { baseStyles, buttonColor } from "../stylesheet";
 
 export default({ navigation }) => {
-  const { userId } = useContext(AuthContext);
+  const { authToken, userId } = useContext(AuthContext);
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [selectedClient, setSelectedClient] = useState('');
@@ -24,7 +25,8 @@ export default({ navigation }) => {
   const [billToVisible, setBillToVisible] = useState(false);
   const [addServiceToVisible, setAddSericeToVisible] = useState(false)
   const [selectedOption, setSelectedOption] = useState(null);
-  const [notes, setNotes] = useState("")
+  const [quantityEnabled, setQuantityEnabled] = useState(false);
+  const [notes, setNotes] = useState("");
   const [myclients, setMyClients] = useState([]); 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [invoiceNumber, setInvoiceNumber] = useState('')
@@ -58,6 +60,7 @@ export default({ navigation }) => {
    useEffect(() => {
      setCurrentDate(format(new Date(), 'dd MMM yyyy'));
      getMyClients()
+     getInvoiceNumber()
      getMyJobs()
    }, [])// Temporary hardcoded list of countries
 
@@ -66,9 +69,7 @@ export default({ navigation }) => {
   const options = ["QUOTE", "UNPAID", "PAID"];
 
   const checkOption = (opt) => {
-    if(opt != "QUOTE") {
-      setInvoiceNumber('123456')
-    }
+    
   }
 
   const calculateSubtotal = (bool: boolean) => {
@@ -78,6 +79,19 @@ export default({ navigation }) => {
       setSubTotal(0)
     }
   }
+
+  const getInvoiceNumber = async () => {
+    try {
+      const response = await axios.get(`${backendApp()}/api/userdetails/`, {
+        headers: {
+          Authorization: `Bearer ${authToken}`, // Send token in header
+        },
+      })
+      setInvoiceNumber(response.data.invoices_generated);
+    } catch (error) {
+      console.error('Error:', error.message)
+    }
+  };
 
   const toggleSwitch = () => {
     setIsTaxIncluded(prev => {
@@ -132,16 +146,17 @@ export default({ navigation }) => {
       description: description,
       price: price,
       clientId: clientId,
-      selectedClientDetail: selectedClientDetail,
+      selectedClientDetail: selectedClientDetail.split("\n"),
       isClientModalVisible: isClientModalVisible,
       isJobModalVisible: isJobModalVisible,
       billToVisible: billToVisible,
       addServiceToVisible: addServiceToVisible,
       selectedOption: selectedOption,
+      quantityEnabled: quantityEnabled,
       notes: notes,
       myclients: myclients,
       showDatePicker: showDatePicker,
-      dudate: date.toISOString(),
+      duedate: format(date, 'dd MMM yyyy'),
       currentDate: currentDate,
       jobs: jobs,
       selectedJob: selectedJob,
@@ -150,7 +165,9 @@ export default({ navigation }) => {
       invoiceNumber: invoiceNumber,
       total: total,
       subtotal: subtotal,
-      taxpercentage: taxpercentage * 100
+      taxpercentage: taxpercentage * 100,
+      taxamount: total * taxpercentage,
+      currency: 'R'
      };
      handleSubmit(formData)
      navigation.navigate('Preview', {data: formData});
@@ -214,7 +231,7 @@ export default({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[baseStyles.container, styles.container]}>
       <ScrollView style={styles.createContainer}>
       <Text>Today's date: {currentDate}</Text>
       <Text style={styles.label}>Select Invoice:</Text>
@@ -295,7 +312,7 @@ export default({ navigation }) => {
           onClose={() => setJobModalVisible(false)}
           options={jobs}
           onSelect={handleSelectItem}
-          title="Select An item"
+          title="Select an item"
         />
         <TouchableOpacity style={styles.addButton} onPress={() => setAddSericeToVisible(true)}>
           <Ionicons name="add-circle" size={30} color="blue" />
@@ -391,11 +408,8 @@ export default({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: "#fff",
+    paddingHorizontal: 10,
   },
-  
   label: {
     fontSize: 16,
     marginBottom: 8,
@@ -422,7 +436,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   selectedOption: {
-    backgroundColor: "#007BFF",
+    backgroundColor: buttonColor,
   },
   optionText: {
     fontSize: 14,
@@ -435,7 +449,7 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 	 },
   submitButton: {
-    backgroundColor: "#007BFF",
+    backgroundColor: buttonColor,
     padding: 15,
     borderRadius: 5,
     alignItems: "center",
