@@ -18,20 +18,35 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from core.viewsets import *
 from core.apiviews import *
+
+router = DefaultRouter()
+
+# Register the viewsets with the router
+# router.register(r'achievements', AchievementViewSet)
+# router.register(r'categories', CategoryViewSet)
+# router.register(r'games_played', GamesPlayedViewSet)
+# router.register(r'questions', QuestionViewSet)
+router.register(r'address-patch', AddressViewSet)
+router.register(r'company-patch', CompanyViewSet, basename='company')
+router.register(r'profile', UserViewSet, basename='user-profile')
 
 urlpatterns = [
     path('kwam/', admin.site.urls),
     path('django-sonar/', include('django_sonar.urls')),
     path("accounts/", include("allauth.urls")),
     # path('api/auth/', include('dj_rest_auth.urls')),  # Login/logout
+    path('api/', include(router.urls)),
     path('api/auth/login/', CustomLoginView.as_view(), name='custom-login'),
     path('api/auth/logout/', CustomLogoutView.as_view(), name='custom_logout'),
     path('api/auth/registration/', CustomRegisterView.as_view(), name='custom-register'),
     path('api/add-job/', AddJobAPIView.as_view(), name="add-job"),
+    path('api/address/', AddressAPIView.as_view(), name='create-address'),
+    path('api/address/<int:company_id>/', AddressAPIView.as_view(), name='address'),
     path('api/jobs/<int:user_id>/', JobsAPIView.as_view(), name="jobs"),
     path('api/jobs/delete/<int:pk>/', JobsAPIView.as_view(), name='jobs'),  # For GET a specific company
-    path('api/address/', AddressAPIView.as_view(), name='create-address'),
     path('api/company/', CompanyView.as_view(), name='company_create_get'),  # For POST and GET all companies
     path('api/update-company-tax/', TaxCompanyView.as_view(), name='company_update_tax'),
     path('api/company/<int:company_id>/', CompanyView.as_view(), name='company_detail'),  # For GET a specific company

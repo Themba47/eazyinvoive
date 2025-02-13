@@ -4,7 +4,7 @@ User = get_user_model()
 
 class Signature(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    signature_data = models.ImageField(upload_to='signatures/')
+    signature = models.ImageField(upload_to='signatures/')
     
     def __str__(self):
        return f"{self.user.username}"
