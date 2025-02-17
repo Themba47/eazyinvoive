@@ -19,6 +19,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+from core.views_email_extract_api import *
 from core.viewsets import *
 from core.apiviews import *
 
@@ -58,4 +59,6 @@ urlpatterns = [
     path('api/userdetails/', UserDetailsAPIView.as_view(), name='user-details'),
     path('api/signature/', UploadSignature.as_view(), name="upload-siganture"),
     path('api/csrf/', csrf_token_view, name='csrf'),
+    # ******************************** EMAIL EXTRACT ****************************************
+    path('api/email-extract/', EmailExtractAPIView.as_view(), name="email-extract")
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

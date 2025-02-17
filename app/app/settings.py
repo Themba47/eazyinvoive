@@ -306,6 +306,9 @@ TRANSLATE_LOCATION = os.environ.get('TRANSLATE_LOCATION')
 
 MOLOAI_PRICE = int(os.environ.get('MOLOAI_PRICE'))
 
+AZURE_FUNDA_KEY = os.environ.get('AZURE_FUNDA_KEY')
+AZURE_FUNDA_ENDPOINT = os.environ.get('AZURE_FUNDA_ENDPOINT')
+
 PAYFAST = {
 "merchant_id":"12847760",
 "merchant_key":"zrtnw9btioujt",
